@@ -118,9 +118,9 @@ class CrossrefReferenceLinkingSettingsForm extends Form {
 				'settings',
 				new RedirectAction($dispatcher->url(
 					$request, ROUTE_PAGE,
-					null, 'management', 'settings', 'publication',
+					null, 'management', 'settings', 'workflow',
 					array('uid' => uniqid()), // Force reload
-					'submissionStage' // Anchor for tab
+					'submission' // Anchor for tab
 				)),
 				__('plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings'),
 				null

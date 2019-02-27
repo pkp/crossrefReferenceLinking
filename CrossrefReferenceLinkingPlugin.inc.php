@@ -68,7 +68,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 	function citationsEnabled($contextId) {
 		$contextDao = Application::getContextDAO();
 		$context = $contextDao->getById($contextId);
-		return $context->getSetting('citationsEnabledSubmission');
+		return !empty($context->getData('citations'));
 	}
 
 	/**
@@ -162,7 +162,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 	 * @param $args array [
 	 *  @option array Task files paths
 	 * ]
-	 * @return bolean
+	 * @return boolean
 	 */
 	function callbackParseCronTab($hookName, $args) {
 		if ($this->getEnabled() || !Config::getVar('general', 'installed')) {
@@ -280,8 +280,8 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 	 */
 	function getAdditionalCitationActionNames($hookName, $params) {
 		$templateMgr = TemplateManager::getManager();
-		$submission =& $templateMgr->getTemplateVars('submission');
-		$parsedCitations =& $templateMgr->getTemplateVars('parsedCitations');
+		$submission = $templateMgr->getTemplateVars('submission');
+		$parsedCitations = $templateMgr->getTemplateVars('parsedCitations');
 
 		$notificationLabel = '<span class="label">'.$this->getDisplayName().'</span>';
 		if (!$parsedCitations->getCount() || !$submission->getStoredPubId('doi') || !$submission->getData($this->getCitationsDiagnosticIdSettingName())) {
@@ -309,7 +309,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 
 		// Add "Check Crossref DOIs" button only if the submission has a DOI and the references were deposited
 		if ($parsedCitations->getCount() && $submission->getStoredPubId('doi') && $submission->getData($this->getCitationsDiagnosticIdSettingName())) {
-			$actionNames =& $templateMgr->getTemplateVars('actionNames');
+			$actionNames = $templateMgr->getTemplateVars('actionNames');
 			$actionNames['getDois'] = __('plugins.generic.crossrefReferenceLinking.citationsFormActionName');
 			$templateMgr->assign(array(
 				'actionNames' => $actionNames,
