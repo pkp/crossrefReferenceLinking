@@ -97,4 +97,3 @@ class CrossrefReferencesDOIsTool extends CommandLineTool {
 
 $tool = new CrossrefReferencesDOIsTool(isset($argv) ? $argv : array());
 $tool->execute();
-?>

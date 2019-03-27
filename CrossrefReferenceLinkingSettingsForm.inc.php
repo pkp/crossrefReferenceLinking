@@ -13,36 +13,17 @@
  * @brief Form for journal managers to setup the reference linking plugin
  */
 
-
 import('lib.pkp.classes.form.Form');
 
 class CrossrefReferenceLinkingSettingsForm extends Form {
-
 	//
 	// Private properties
 	//
 	/** @var integer */
 	var $_contextId;
 
-	/**
-	 * Get the context ID.
-	 * @return integer
-	 */
-	function _getContextId() {
-		return $this->_contextId;
-	}
-
 	/** @var CrossrefReferenceLinkingPlugin */
 	var $_plugin;
-
-	/**
-	 * Get the plugin.
-	 * @return CrossrefReferenceLinkingPlugin
-	 */
-	function _getPlugin() {
-		return $this->_plugin;
-	}
-
 
 	//
 	// Constructor
@@ -65,6 +46,24 @@ class CrossrefReferenceLinkingSettingsForm extends Form {
 		$this->addCheck(new FormValidatorCSRF($this));
 	}
 
+	//
+	// Public methods
+	//
+	/**
+	 * Get the context ID.
+	 * @return integer
+	 */
+	function _getContextId() {
+		return $this->_contextId;
+	}
+
+	/**
+	 * Get the plugin.
+	 * @return CrossrefReferenceLinkingPlugin
+	 */
+	function _getPlugin() {
+		return $this->_plugin;
+	}
 
 	//
 	// Implement template methods from Form
@@ -165,7 +164,5 @@ class CrossrefReferenceLinkingSettingsForm extends Form {
 	function isOptional($settingName) {
 		return in_array($settingName, array('automaticRegistration', 'testMode'));
 	}
-
 }
 
-?>

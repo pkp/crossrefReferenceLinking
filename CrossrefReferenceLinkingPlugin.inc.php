@@ -503,4 +503,3 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 
 }
 
-?>

@@ -25,4 +25,4 @@
 		<p>{translate key="plugins.generic.crossrefReferenceLinking.settings.form.requirements.ok"}</p>
 	{/if}
 </div>
-</form>
+
