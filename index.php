@@ -19,4 +19,3 @@ require_once('CrossrefReferenceLinkingPlugin.inc.php');
 
 return new CrossrefReferenceLinkingPlugin();
 
-?>

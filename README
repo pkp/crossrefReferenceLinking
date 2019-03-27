@@ -20,6 +20,10 @@ OJS 3.1.2
 
 Installation
 ------------
+There are three ways of installing the plugin:
+* Plugin Gallery
+ * Access your journal's plugin gallery as Site Administrator and install the plugin there.
+* Manual installation (not recommended)
  * Copy the release source or unpack the release package into the OJS plugins/generic/crossrefReferenceLinking/ folder.
  * Run `php tools/upgrade.php upgrade` from the OJS folder.
  * Go to Settings -> Website -> Plugins -> Generic Plugin -> Crossref Reference Linking Plugin and enable the plugin.

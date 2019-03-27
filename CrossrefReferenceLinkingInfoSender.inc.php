@@ -85,4 +85,4 @@ class CrossrefReferenceLinkingInfoSender extends ScheduledTask {
 		return $journals;
 	}
 }
-?>
+
