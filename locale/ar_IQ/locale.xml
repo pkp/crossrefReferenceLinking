@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE locale SYSTEM "../../../../../lib/pkp/dtd/locale.dtd">
+
+<!--
+  * @file plugins/generic/crossrefReferenceLinking/locale/ar_IQ/locale.xml
+  *
+  * Copyright (c) 2013-2019 Simon Fraser University
+  * Copyright (c) 2003-2019 John Willinsky
+  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
+  *
+  * Crossref Reference Linking plugin localization strings for the ar_IQ (Arabic) locale.
+  -->
+ 
+<locale name="ar_IQ" full_name="العربية">
+	<message key="plugins.generic.crossrefReferenceLinking.displayName">ربط المراجع Crossref</message>
+	<message key="plugins.generic.crossrefReferenceLinking.description">هذه الإضافة تقوم بتقديم مراجع المقالة إلى Crossref عندما يكون DOI مسجلاً ثم تعرض تلقائياً معرفات DOI للمراجع التي تعثر عليها في قاعدة بيانات Crossref.</message>
+	<message key="plugins.generic.crossrefReferenceLinking.description.long">هذه الإضافة ستضيف تلقائياً مراجع المقالة المستقاة إلى تسجيل DOI مع Crossref. سيقوم Crossref بعدها بالتدقيق التلقائي فيما إذا كان بالإمكان العثور على أي DOI للمراجع المقدمة. مباشرة بعد ذلك، يمكنك استعمال الإضافة للتحقق من معرفات DOI المعثور عليها، إما تلقائياً (إذا كان الخيار المعني مضبوطاً في إضافة التصدير Crossref) أو يدوياً في تبويب البيانات الوصفية لطلب التقديم "المراجع".</message>
+	<message key="plugins.generic.crossrefReferenceLinking.description.note">إذا غيرت مراجع المقالة بعد تسجيل معرفات DOI، سيترتب عليك إعادة تسجيل معرفات DOI لها مرة أخرى والتحقق مجددأً من معرفات المكونات الرقمية لمراجعها.</message>
+	<message key="plugins.generic.crossrefReferenceLinking.description.requirements">هذه الإضافة تتطلب تتطلب أن تكون المقالة قد حصلت على معرف DOI لـ Crossref وأن هذا المعرف لا بد أن يكون مودعاً مع Crossref من داخل نظام المجلات المفتوحة. مراجع المقالة يمكن الحصول عليها من باب البيانات الوصفية ضمن مخطط سير العمل لطلب التقديم.</message>
+
+	<message key="plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings">إعدادات إضافة التصدير Crossref بصيغة XML</message>
+	<message key="plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings.required">اسم المستخدم وكلمة المرور لـ Crossref لا بد من تعريفهما:</message>
+	<message key="plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings">إعدادات البيانات الوصفية لطلب التقديم</message>
+	<message key="plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings.required">لا بد من تمكين البيانات الوصفية لمراجع طلب التقديم:</message>
+	<message key="plugins.generic.crossrefReferenceLinking.settings.form.requirements.ok">أنت جاهز تماماً!</message>
+
+	<message key="plugins.generic.crossrefReferenceLinking.citationsFormActionName">تحقق من معرفات المكونات الرقمية لـ Crossref</message>	
+	<message key="plugins.generic.crossrefReferenceLinking.citationsForm.warning.toCheck">لتكون قادراً على التحقق من معرفات المكونات الرقمية لمراجع Crossref، تحتاج إلى</message>	
+	<message key="plugins.generic.crossrefReferenceLinking.citationsForm.warning.extractCitations">استخرج المراجع واحفظها هنا</message>	
+	<message key="plugins.generic.crossrefReferenceLinking.citationsForm.warning.assignDOI">تعيين معرف مكون رقمي للمقالة</message>	
+	<message key="plugins.generic.crossrefReferenceLinking.citationsForm.warning.registerDOI">تسجيل معرف المكون الرقمي هذا للمقالة مع المراجع المستخرجة في Crossref</message>	
+	<message key="plugins.generic.crossrefReferenceLinking.citationsForm.warning.toCheck.ok">استعمل الزر أدناه للتحقق من معرفات المكونات الرقمية للمراجع عبر Crossref.</message>	
+	<!-- scheduled task -->
+	<message key="plugins.generic.crossrefReferenceLinking.senderTask.name">مهمة التسجيل التلقائي CrossrefReferenceLinking</message>
+</locale>
