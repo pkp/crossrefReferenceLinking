@@ -6,8 +6,8 @@
 
 About
 -----
-This plugin will automatically add the extracted article references to the DOI registration with Crossref. Crossref will then automatically check if any DOIs can be found for the submitted references. Shortly after that, the user can use the plugin to check for the found references DOIs, either automatically or manually in the submission metadata tab "References". If article references change once they are registered, the article DOI withe the new references will have to be registered anew. Then the check for the found references DOIs should be done again.
-This plugin requires Crossref DOIs to be assigned to articles, article references to be separately entered and extracted, as well as article DOIs to be deposited to Crossref from within OJS. It uses the Crossref Export/Registration plugin settings: Crossref credentials (username and passwort), the setting for the automatic DOI deposit (here for automatic references DOIs check), as well as the setting for the testing mode.
+This plugin will automatically add the extracted article references to the DOI registration with Crossref. Crossref will then automatically check if any DOIs can be found for the submitted references. Shortly after that, the user can use the plugin to check for the found references DOIs, either automatically or manually in the submission metadata tab "References". If article references change once they are registered, the article DOI with the new references will have to be registered anew. Then the check for the found references DOIs should be done again.
+This plugin requires Crossref DOIs to be assigned to articles, article references to be separately entered and extracted, as well as article DOIs to be deposited to Crossref from within OJS. It uses the Crossref Export/Registration plugin settings: Crossref credentials (username and password), the setting for the automatic DOI deposit (here for automatic references DOIs check), as well as the setting for the testing mode.
 
 License
 -------
@@ -23,7 +23,7 @@ Installation
 There are three ways of installing the plugin:
 * Plugin Gallery
  * Access your journal's plugin gallery as Site Administrator and install the plugin there.
-* Manual installation (not recommended)
+ * Manual installation (not recommended)
  * Copy the release source or unpack the release package into the OJS plugins/generic/crossrefReferenceLinking/ folder.
  * Run `php tools/upgrade.php upgrade` from the OJS folder.
  * Go to Settings -> Website -> Plugins -> Generic Plugin -> Crossref Reference Linking Plugin and enable the plugin.
