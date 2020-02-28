@@ -1,0 +1,63 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2020-02-28T01:15:08+00:00\n"
+"PO-Revision-Date: 2020-02-28T01:15:08+00:00\n"
+"Language: \n"
+
+msgid "plugins.generic.crossrefReferenceLinking.displayName"
+msgstr "ربط المراجع Crossref"
+
+msgid "plugins.generic.crossrefReferenceLinking.description"
+msgstr "هذه الإضافة تقوم بتقديم مراجع المقالة إلى Crossref عندما يكون DOI مسجلاً ثم تعرض تلقائياً معرفات DOI للمراجع التي تعثر عليها في قاعدة بيانات Crossref."
+
+msgid "plugins.generic.crossrefReferenceLinking.description.long"
+msgstr "هذه الإضافة ستضيف تلقائياً مراجع المقالة المستقاة إلى تسجيل DOI مع Crossref. سيقوم Crossref بعدها بالتدقيق التلقائي فيما إذا كان بالإمكان العثور على أي DOI للمراجع المقدمة. مباشرة بعد ذلك، يمكنك استعمال الإضافة للتحقق من معرفات DOI المعثور عليها، إما تلقائياً (إذا كان الخيار المعني مضبوطاً في إضافة التصدير Crossref) أو يدوياً في تبويب البيانات الوصفية لطلب التقديم \"المراجع\"."
+
+msgid "plugins.generic.crossrefReferenceLinking.description.note"
+msgstr "إذا غيرت مراجع المقالة بعد تسجيل معرفات DOI، سيترتب عليك إعادة تسجيل معرفات DOI لها مرة أخرى والتحقق مجددأً من معرفات المكونات الرقمية لمراجعها."
+
+msgid "plugins.generic.crossrefReferenceLinking.description.requirements"
+msgstr "هذه الإضافة تتطلب تتطلب أن تكون المقالة قد حصلت على معرف DOI لـ Crossref وأن هذا المعرف لا بد أن يكون مودعاً مع Crossref من داخل نظام المجلات المفتوحة. مراجع المقالة يمكن الحصول عليها من باب البيانات الوصفية ضمن مخطط سير العمل لطلب التقديم."
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings"
+msgstr "إعدادات إضافة التصدير Crossref بصيغة XML"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings.required"
+msgstr "اسم المستخدم وكلمة المرور لـ Crossref لا بد من تعريفهما:"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings"
+msgstr "إعدادات البيانات الوصفية لطلب التقديم"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings.required"
+msgstr "لا بد من تمكين البيانات الوصفية لمراجع طلب التقديم:"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.requirements.ok"
+msgstr "أنت جاهز تماماً!"
+
+msgid "plugins.generic.crossrefReferenceLinking.citationsFormActionName"
+msgstr "تحقق من معرفات المكونات الرقمية لـ Crossref"
+
+msgid "plugins.generic.crossrefReferenceLinking.citationsForm.warning.toCheck"
+msgstr "لتكون قادراً على التحقق من معرفات المكونات الرقمية لمراجع Crossref، تحتاج إلى"
+
+msgid "plugins.generic.crossrefReferenceLinking.citationsForm.warning.extractCitations"
+msgstr "استخرج المراجع واحفظها هنا"
+
+msgid "plugins.generic.crossrefReferenceLinking.citationsForm.warning.assignDOI"
+msgstr "تعيين معرف مكون رقمي للمقالة"
+
+msgid "plugins.generic.crossrefReferenceLinking.citationsForm.warning.registerDOI"
+msgstr "تسجيل معرف المكون الرقمي هذا للمقالة مع المراجع المستخرجة في Crossref"
+
+msgid "plugins.generic.crossrefReferenceLinking.citationsForm.warning.toCheck.ok"
+msgstr "استعمل الزر أدناه للتحقق من معرفات المكونات الرقمية للمراجع عبر Crossref."
+
+msgid "plugins.generic.crossrefReferenceLinking.senderTask.name"
+msgstr "مهمة التسجيل التلقائي CrossrefReferenceLinking"
