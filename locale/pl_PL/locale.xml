@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE locale SYSTEM "../../../../lib/pkp/dtd/locale.dtd">
+
+<!--
+  * locale/pl_PL/locale.xml
+  *
+  * Copyright (c) 2014-2019 Simon Fraser University
+  * Copyright (c) 2003-2019 John Willinsky
+  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
+  *
+  * Localization strings.
+  -->
+
+<locale name="pl_PL" full_name="Język polski">
+	<message key="plugins.generic.crossrefReferenceLinking.displayName">Linkowanie bibliografii identyfikatorami Crossref</message>
+	<message key="plugins.generic.crossrefReferenceLinking.description">Wtyczka automatycznie wysyła bibliografię artykułu do Crossref i wyświetla DOI w miejscach w których indeks wykazuje prawidłowe porównanie. </message>
+	<message key="plugins.generic.crossrefReferenceLinking.description.long">Ta wtyczka automatycznie doda odniesienia do wyodrębnionego artykułu zarejestrowanego uprzednio jako DOI w Crossref. Crossref automatycznie sprawdzi, czy można znaleźć jakieś DOI dla przesłanych referencji. Wkrótce potem możesz użyć wtyczki, aby wyszukać znalezione DOI referencji, albo automatycznie (jeśli odpowiednia opcja jest ustawiona we wtyczce Crossref Export) lub ręcznie na karcie metadanych przesyłania „Referencje”</message>
+	<message key="plugins.generic.crossrefReferenceLinking.description.note">Jeśli zmienisz/dodasz cytowania w artykule po zarejestrowaniu jego DOI, będziesz musiał ponownie wykonac procedurę rejestracji sprawdzenia wpisów bibliograficznych.</message>
+	<message key="plugins.generic.crossrefReferenceLinking.description.requirements">Ta wtyczka wymaga przypisania artykułu w Crossref DOI. DOI musi zostać założony w Crossref z poziomu OJS. Bibliografię do artykułów można podać w sekcji Metadane kazdego artykułu.
+</message>
+	<message key="plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings">Wtyczka exportu do Crossref- Ustawienia</message>
+	<message key="plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings.required">Login i hasło do Crossref musi być skonfigurowane:</message>
+	<message key="plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings">Ustawienia Metadanych zgłoszenia</message>
+	<message key="plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings.required">Metadane bibliografii zgłoszenia powinny być włączone: </message>
+	<message key="plugins.generic.crossrefReferenceLinking.settings.form.requirements.ok">Wszystkie ustawienia w porządku!</message>
+	<message key="plugins.generic.crossrefReferenceLinking.citationsFormActionName">Sprawdź DOI w Crossref</message>
+	<message key="plugins.generic.crossrefReferenceLinking.citationsForm.warning.toCheck">Aby dokonywać porównań numerów DOI z bibliografią powinienieś:</message>
+	<message key="plugins.generic.crossrefReferenceLinking.citationsForm.warning.extractCitations">najpierw zapisać cytowania w tym miejscu.</message>
+	<message key="plugins.generic.crossrefReferenceLinking.citationsForm.warning.assignDOI">Najpierw przydzieli DOI do artykułu.</message>
+	<message key="plugins.generic.crossrefReferenceLinking.citationsForm.warning.registerDOI">Najpierw zarejestruj artykuł razem z podaną bibliografią w Crossref</message>
+	<message key="plugins.generic.crossrefReferenceLinking.citationsForm.warning.toCheck.ok">Użyj poniższego przycisku aby sprawdzić pasujące DOI dla bibliografii</message>
+	<message key="plugins.generic.crossrefReferenceLinking.senderTask.name">CrossrefReferenceLinking zadanie automatycznej rejestracji</message>
+</locale>
