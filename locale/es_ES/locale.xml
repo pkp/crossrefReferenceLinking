@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE locale SYSTEM "../../../../../lib/pkp/dtd/locale.dtd">
+
+<!--
+  * @file plugins/generic/crossrefReferenceLinking/locale/es_ES/locale.xml
+  *
+  * Copyright (c) 2013-2019 Simon Fraser University
+  * Copyright (c) 2003-2019 John Willinsky
+  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
+  *
+  * Crossref Reference Linking plugin localization strings for the es_ES (ES. España) locale.
+  -->
+ 
+<locale name="es_ES" full_name="Español (España)">
+	<message key="plugins.generic.crossrefReferenceLinking.displayName">Vinculación de referencias Crossref</message>
+	<message key="plugins.generic.crossrefReferenceLinking.description">Este módulo envía las citas del artículo a Crossref en tanto es señalado un DOI, así muestra automáticamente los DOIs de las referencias encontradas en la base de datos de Crossref.</message>
+	<message key="plugins.generic.crossrefReferenceLinking.description.long">Este módulo agregará automáticamente las referencias extraídas del artículo al registro DOI con Crossref. Crossref verificará automáticamente si se puede encontrar algún DOI para las referencias enviadas. Poco después de eso, puede usar el módulo para verificar las referencias DOI encontradas, ya sea automáticamente (si la opción apropiada está establecida en el módulo de exportación Crossref) o manualmente en la pestaña "Referencias" de envío de metadatos.</message>
+	<message key="plugins.generic.crossrefReferenceLinking.description.note">Si cambia las referencias de un artículo después de registrar el DOI, deberá volver a registrar el DOI del artículo y verificar nuevamente los DOIs de las referencias del artículo.</message>
+	<message key="plugins.generic.crossrefReferenceLinking.description.requirements">Este módulo requiere que se asigne un artículo a un DOI Crossref y éste debe depositarse en Crossref desde OJS. Se pueden proporcionar las referencias del artículo en la sección Metadatos en el flujo de trabajo de los envíos.</message>
+
+	<message key="plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings">Configuración del módulo de exportación XML Crossref</message>
+	<message key="plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings.required">El nombre de usuario y contraseña Crossref deben estar configurados:</message>
+	<message key="plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings">Configuración de metadatos de envío</message>
+	<message key="plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings.required">Los metadatos de referencias de envío deben estar habilitados:</message>
+	<message key="plugins.generic.crossrefReferenceLinking.settings.form.requirements.ok">Ya está todo listo!</message>
+
+	<message key="plugins.generic.crossrefReferenceLinking.citationsFormActionName">Verificar DOIs en Crossref</message>	
+	<message key="plugins.generic.crossrefReferenceLinking.citationsForm.warning.toCheck">Para poder verificar las referencias cruzadas DOIs necesita</message>	
+	<message key="plugins.generic.crossrefReferenceLinking.citationsForm.warning.extractCitations">extraer y guardar las referencias aquí</message>	
+	<message key="plugins.generic.crossrefReferenceLinking.citationsForm.warning.assignDOI">asignar un DOI al artículo</message>	
+	<message key="plugins.generic.crossrefReferenceLinking.citationsForm.warning.registerDOI">registrar el DOI del artículo junto con las referencias extraídas con CrossRef</message>	
+	<message key="plugins.generic.crossrefReferenceLinking.citationsForm.warning.toCheck.ok">Use el botón a continuación para verificar las citas DOIs en Crossref.</message>	
+	<!-- scheduled task -->
+	<message key="plugins.generic.crossrefReferenceLinking.senderTask.name">Tarea de registro automático CrossrefReferenceLinking</message>
+</locale>
