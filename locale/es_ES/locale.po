@@ -1,0 +1,63 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2020-03-03T16:23:43+00:00\n"
+"PO-Revision-Date: 2020-03-03T16:23:43+00:00\n"
+"Language: \n"
+
+msgid "plugins.generic.crossrefReferenceLinking.displayName"
+msgstr "Vinculación de referencias Crossref"
+
+msgid "plugins.generic.crossrefReferenceLinking.description"
+msgstr "Este módulo envía las citas del artículo a Crossref en tanto es señalado un DOI, así muestra automáticamente los DOIs de las referencias encontradas en la base de datos de Crossref."
+
+msgid "plugins.generic.crossrefReferenceLinking.description.long"
+msgstr "Este módulo agregará automáticamente las referencias extraídas del artículo al registro DOI con Crossref. Crossref verificará automáticamente si se puede encontrar algún DOI para las referencias enviadas. Poco después de eso, puede usar el módulo para verificar las referencias DOI encontradas, ya sea automáticamente (si la opción apropiada está establecida en el módulo de exportación Crossref) o manualmente en la pestaña \"Referencias\" de envío de metadatos."
+
+msgid "plugins.generic.crossrefReferenceLinking.description.note"
+msgstr "Si cambia las referencias de un artículo después de registrar el DOI, deberá volver a registrar el DOI del artículo y verificar nuevamente los DOIs de las referencias del artículo."
+
+msgid "plugins.generic.crossrefReferenceLinking.description.requirements"
+msgstr "Este módulo requiere que se asigne un artículo a un DOI Crossref y éste debe depositarse en Crossref desde OJS. Se pueden proporcionar las referencias del artículo en la sección Metadatos en el flujo de trabajo de los envíos."
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings"
+msgstr "Configuración del módulo de exportación XML Crossref"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings.required"
+msgstr "El nombre de usuario y contraseña Crossref deben estar configurados:"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings"
+msgstr "Configuración de metadatos de envío"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings.required"
+msgstr "Los metadatos de referencias de envío deben estar habilitados:"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.requirements.ok"
+msgstr "Ya está todo listo!"
+
+msgid "plugins.generic.crossrefReferenceLinking.citationsFormActionName"
+msgstr "Verificar DOIs en Crossref"
+
+msgid "plugins.generic.crossrefReferenceLinking.citationsForm.warning.toCheck"
+msgstr "Para poder verificar las referencias cruzadas DOIs necesita"
+
+msgid "plugins.generic.crossrefReferenceLinking.citationsForm.warning.extractCitations"
+msgstr "extraer y guardar las referencias aquí"
+
+msgid "plugins.generic.crossrefReferenceLinking.citationsForm.warning.assignDOI"
+msgstr "asignar un DOI al artículo"
+
+msgid "plugins.generic.crossrefReferenceLinking.citationsForm.warning.registerDOI"
+msgstr "registrar el DOI del artículo junto con las referencias extraídas con CrossRef"
+
+msgid "plugins.generic.crossrefReferenceLinking.citationsForm.warning.toCheck.ok"
+msgstr "Use el botón a continuación para verificar las citas DOIs en Crossref."
+
+msgid "plugins.generic.crossrefReferenceLinking.senderTask.name"
+msgstr "Tarea de registro automático CrossrefReferenceLinking"
