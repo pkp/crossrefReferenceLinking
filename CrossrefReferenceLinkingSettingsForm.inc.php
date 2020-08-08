@@ -165,4 +165,3 @@ class CrossrefReferenceLinkingSettingsForm extends Form {
 		return in_array($settingName, array('automaticRegistration', 'testMode'));
 	}
 }
-

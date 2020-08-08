@@ -26,7 +26,7 @@ class CrossrefReferenceLinkingInfoSender extends ScheduledTask {
 	 */
 	function __construct($args) {
 		PluginRegistry::loadCategory('generic');
-		$plugin = PluginRegistry::getPlugin('generic', 'crossrefreferencelinkingplugin'); /* @var $plugin CrossrefReferenceLinkingPlugin */
+		$plugin = PluginRegistry::getPlugin('generic', 'crossrefreferencelinkingplugin'); /** @var $plugin CrossrefReferenceLinkingPlugin */
 
 		$this->_plugin = $plugin;
 
@@ -57,9 +57,9 @@ class CrossrefReferenceLinkingInfoSender extends ScheduledTask {
 			// Call the plugin register function, in order to be able to save the new article and citation settings in the DB
 			$plugin->register('generic', $plugin->getPluginPath(), $journal->getId());
 			// Get published articles to check
-			$articlesToCheck = $plugin->getArticlesToCheck($journal);
-			while ($article = $articlesToCheck->next()) {
-				$plugin->getCrossrefReferencesDOIs($article);
+			$submissionsToCheck = $plugin->getSubmissionsToCheck($journal);
+			foreach ($submissionsToCheck as $submissionToCheck) { /** @var $submissionToCheck Submission */
+				$plugin->getCrossrefReferencesDOIs($submissionToCheck->getCurrentPublication());
 			}
 		}
 		return true;
@@ -74,15 +74,19 @@ class CrossrefReferenceLinkingInfoSender extends ScheduledTask {
 		PluginRegistry::loadCategory('importexport');
 		$crossrefExportPlugin = PluginRegistry::getPlugin('importexport', 'CrossRefExportPlugin');
 
-		$contextDao = Application::getContextDAO(); /* @var $contextDao JournalDAO */
+		$contextDao = Application::getContextDAO(); /** @var $contextDao JournalDAO */
 		$journalFactory = $contextDao->getAll(true);
 		$journals = array();
 		while($journal = $journalFactory->next()) {
 			$journalId = $journal->getId();
-			if (!$journal->getSetting('citationsEnabledSubmission') || !$crossrefExportPlugin->getSetting($journalId, 'username') || !$crossrefExportPlugin->getSetting($journalId, 'password') || !$crossrefExportPlugin->getSetting($journalId, 'automaticRegistration')) continue;
-			$journals[] = $journal;
+			if ($this->_plugin->citationsEnabled($journalId) &&
+				$crossrefExportPlugin->getSetting($journalId, 'username') && 
+				$crossrefExportPlugin->getSetting($journalId, 'password') && 
+				$crossrefExportPlugin->getSetting($journalId, 'automaticRegistration')) {
+					$journals[] = $journal;
+			}
 		}
+
 		return $journals;
 	}
 }
-
