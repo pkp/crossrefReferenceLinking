@@ -189,7 +189,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 	 */
 	function addCrossrefCitationsElements($hookName, $params) {
 		$preliminaryOutput =& $params[0];
-		$request = Application::getRequest();
+		$request = Application::get()->getRequest();
 		$context = $request->getContext();
 		// if Crossref export is executed via CLI, there will be no context
 		$contextId = isset($context) ? $context->getId() : null;
