@@ -80,8 +80,8 @@ class CrossrefReferenceLinkingInfoSender extends ScheduledTask {
 		while($journal = $journalFactory->next()) {
 			$journalId = $journal->getId();
 			if ($this->_plugin->citationsEnabled($journalId) &&
-				$crossrefExportPlugin->getSetting($journalId, 'username') && 
-				$crossrefExportPlugin->getSetting($journalId, 'password') && 
+				$crossrefExportPlugin->getSetting($journalId, 'username') &&
+				$crossrefExportPlugin->getSetting($journalId, 'password') &&
 				$crossrefExportPlugin->getSetting($journalId, 'automaticRegistration')) {
 					$journals[] = $journal;
 			}

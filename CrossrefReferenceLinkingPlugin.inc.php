@@ -45,11 +45,11 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 
 				// Publication Published hook
 				HookRegistry::register('Publication::publish', array($this, 'checkPublicationsCitations'));
-				
+
 				// article page hooks
 				HookRegistry::register('Templates::Article::Details::Reference', array($this, 'displayReferenceDOI'));
 				HookRegistry::register('Templates::Controllers::Tab::PublicationEntry::Form::CitationsForm::Citation', array($this, 'displayReferenceDOI'));
-				
+
 			}
 		}
 		return $success;
@@ -75,7 +75,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 	function citationsEnabled($contextId) {
 		$contextDao = Application::getContextDAO();
 		$context = $contextDao->getById($contextId);
-		return !empty($context->getData('citations'));
+		return $context->getSetting('citations') == 'enable';
 	}
 
 	/**
@@ -203,11 +203,19 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 			$doiNode = $doiDataNode->getElementsByTagName('doi')->item(0);
 			$doi = $doiNode->nodeValue;
 
-			$publication = $publicationDAO->getByPubId('doi', $doi, $contextId);
-			assert($publication);
-			if (isset($publication)) {
-				$articleCitations = $citationDao->getByPublicationId($publication->getId());
-				if ($articleCitations->getCount() != 0) {
+			$publicationIds = $publicationDAO->getIdsBySetting('pub-id::doi', $doi, $contextId);
+
+			assert(count($publicationIds) >= 1);
+			if (count($publicationIds) >= 1) {
+				$submissionDao = DAORegistry::getDAO('SubmissionDAO');
+				$publicationService = Services::get('publication');
+				$submissionService = Services::get('submission');
+
+				$publication = $publicationService->get($publicationIds[0]);
+				$submission = $submissionService->get($publication->getData('submissionId')); /** @var $submission Submission*/
+
+				$articleCitations = $citationDao->getByPublicationId($submission->getCurrentPublication()->getId());
+				if (count($articleCitations) != 0) {
 					$citationListNode = $preliminaryOutput->createElementNS($rfNamespace, 'citation_list');
 					while ($citation = $articleCitations->next()) {
 						$rawCitation = $citation->getRawCitation();
@@ -315,10 +323,10 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 		if ($submission->getData($this->getCitationsDiagnosticIdSettingName())) {
 			$submission->setData($this->getCitationsDiagnosticIdSettingName(), null);
 			$submission->setData($this->getAutoCheckSettingName(), null);
-	
+
 			$submission = Services::get('submission')->edit($submission, array(), Application::get()->getRequest());
 		}
-		
+
 		return false;
 	}
 
@@ -385,7 +393,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 
 					// remove auto check setting
 					$submission->setData($this->getAutoCheckSettingName(), null);
-					
+
 					$submission = Services::get('submission')->edit($submission, array(), Application::get()->getRequest());
 				}
 			}
@@ -466,7 +474,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 	 */
 	function _getResolvedRefs($doi, $contextId) {
 		$matchedReferences = null;
-		
+
 		PluginRegistry::loadCategory('importexport');
 		$crossrefExportPlugin = PluginRegistry::getPlugin('importexport', 'CrossRefExportPlugin');
 		$username = $crossrefExportPlugin->getSetting($contextId, 'username');
@@ -475,20 +483,20 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 		// Use a different endpoint for testing and production.
 		$isTestMode = $crossrefExportPlugin->getSetting($contextId, 'testMode') == 1;
 		$endpoint = ($isTestMode ? CROSSREF_API_REFS_URL_DEV : CROSSREF_API_REFS_URL);
-		
+
 		$url = $endpoint.$doi.'&usr='.$username.'&pwd='.$password;
 
-		import('lib.pkp.classes.helpers.PKPCurlHelper');
-		$curlCh = PKPCurlHelper::getCurlObject($url);
-		curl_setopt($curlCh, CURLOPT_RETURNTRANSFER, true);
-
-		$response = curl_exec($curlCh);
-		if ($response && curl_getinfo($curlCh, CURLINFO_HTTP_CODE) == 200)  {
-			$response = json_decode($response, true);
-			$matchedReferences = $response['matched-references'];
+		$httpClient = Application::get()->getHttpClient();
+		try {
+			$response = $httpClient->request('POST', $url);
+		} catch (GuzzleHttp\Exception\RequestException $e) {
+			return null;
 		}
 
-		curl_close($curlCh);
+		if ($response && $response->getStatusCode() == 200)  {
+			$response = json_decode($response->getBody(), true);
+			$matchedReferences = $response['matched-references'];
+		}
 
 		return $matchedReferences;
 	}

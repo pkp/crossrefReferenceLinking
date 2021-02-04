@@ -119,7 +119,7 @@ class CrossrefReferenceLinkingSettingsForm extends Form {
 					$request, ROUTE_PAGE,
 					null, 'management', 'settings', 'workflow',
 					array('uid' => uniqid()), // Force reload
-					'submission' // Anchor for tab
+					'submission/metadata' // Anchor for tab
 				)),
 				__('plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings'),
 				null
