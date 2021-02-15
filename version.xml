@@ -4,8 +4,8 @@
 <!--
   * version.xml
   *
-  * Copyright (c) 2013-2020 Simon Fraser University
-  * Copyright (c) 2003-2020 John Willinsky
+  * Copyright (c) 2013-2021 Simon Fraser University
+  * Copyright (c) 2003-2021 John Willinsky
   * Distributed under the GNU GPL v3. For full terms see the file LICENSE.
   *
   * Plugin version information.
@@ -13,8 +13,8 @@
 <version>
 	<application>crossrefReferenceLinking</application>
 	<type>plugins.generic</type>
-	<release>1.0.1.1</release>
-	<date>2020-06-19</date>
+	<release>1.0.2</release>
+	<date>2021-02-27</date>
 	<lazy-load>1</lazy-load>
 	<sitewide>1</sitewide>
 	<class>CrossrefReferenceLinkingPlugin</class>
