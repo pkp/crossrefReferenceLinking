@@ -47,8 +47,7 @@ class CrossrefReferencesDOIsTool extends CommandLineTool {
 	 * Check citations DOIs
 	 */
 	function execute() {
-		$submissionDao = Application::getSubmissionDAO();
-		$citationDao = DAORegistry::getDAO('CitationDAO');
+		$submissionDao = DAORegistry::getDAO('SubmissionDAO');
 		$contextDao = Application::getContextDAO();
 
 		switch(array_shift($this->parameters)) {
@@ -57,7 +56,7 @@ class CrossrefReferencesDOIsTool extends CommandLineTool {
 				while ($context = $contexts->next()) {
 					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $context->getId());
 					// Get published articles to check
-					$submissionsToCheck = $plugin->getArticlesToCheck($context);
+					$submissionsToCheck = $plugin->getSubmissionsToCheck($context);
 					while ($submission = $submissionsToCheck->next()) {
 						$plugin->getCrossrefReferencesDOIs($submission);
 					}
@@ -72,7 +71,7 @@ class CrossrefReferencesDOIsTool extends CommandLineTool {
 					}
 					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $context->getId());
 					// Get published articles to check
-					$submissionsToCheck = $plugin->getArticlesToCheck($context);
+					$submissionsToCheck = $plugin->getSubmissionsToCheck($context);
 					while ($submission = $submissionsToCheck->next()) {
 						$plugin->getCrossrefReferencesDOIs($submission);
 					}
@@ -86,7 +85,8 @@ class CrossrefReferencesDOIsTool extends CommandLineTool {
 						continue;
 					}
 					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $submission->getContextId());
-					$plugin->getCrossrefReferencesDOIs($submission);				}
+					$plugin->getCrossrefReferencesDOIs($submission);
+				}
 				break;
 			default:
 				$this->usage();
