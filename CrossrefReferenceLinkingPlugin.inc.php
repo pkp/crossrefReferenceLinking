@@ -457,13 +457,16 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 	function getSubmissionsToCheck($context) {
 		// Retrieve all published articles with their DOIs depositted together with the references.
 		// i.e. with the citations diagnostic ID setting
-		$submissions = Services::get('submission')->getMany([
-			'contextId' => $context->getId(),
-			'status' => STATUS_PUBLISHED,
-			$this->getAutoCheckSettingName() => true
-		]);
+		$submissionDao = DAORegistry::getDAO('SubmissionDAO'); /** @var $submissionDao SubmissionDAO */
+		$submissionIds = $submissionDao->getIdsBySetting($this->getAutoCheckSettingName(), true, $context->getId());
 
-		return $submissions;
+		$submissions = array_map(function($submissionId) {
+			return Services::get('submission')->get($submissionId);
+		}, $submissionIds);
+
+		return array_filter($submissions, function($submission) {
+			return $submission->getData('status') === STATUS_PUBLISHED;
+		});
 	}
 
 	/**

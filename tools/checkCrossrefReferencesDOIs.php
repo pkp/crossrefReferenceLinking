@@ -57,8 +57,8 @@ class CrossrefReferencesDOIsTool extends CommandLineTool {
 					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $context->getId());
 					// Get published articles to check
 					$submissionsToCheck = $plugin->getSubmissionsToCheck($context);
-					while ($submission = $submissionsToCheck->next()) {
-						$plugin->getCrossrefReferencesDOIs($submission);
+					foreach ($submissionsToCheck as $submissionToCheck) { /** @var $submissionToCheck Submission */
+						$plugin->getCrossrefReferencesDOIs($submissionToCheck->getCurrentPublication());
 					}
 				}
 				break;
@@ -72,8 +72,8 @@ class CrossrefReferencesDOIsTool extends CommandLineTool {
 					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $context->getId());
 					// Get published articles to check
 					$submissionsToCheck = $plugin->getSubmissionsToCheck($context);
-					while ($submission = $submissionsToCheck->next()) {
-						$plugin->getCrossrefReferencesDOIs($submission);
+					foreach ($submissionsToCheck as $submissionToCheck) { /** @var $submissionToCheck Submission */
+						$plugin->getCrossrefReferencesDOIs($submissionToCheck->getCurrentPublication());
 					}
 				}
 				break;
