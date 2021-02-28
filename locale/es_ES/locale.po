@@ -17,12 +17,14 @@ msgstr "Vinculación de referencias Crossref"
 msgid "plugins.generic.crossrefReferenceLinking.description"
 msgstr "Este módulo envía las citas del artículo a Crossref en tanto es señalado un DOI, así muestra automáticamente los DOIs de las referencias encontradas en la base de datos de Crossref."
 
+#, fuzzy
 msgid "plugins.generic.crossrefReferenceLinking.description.long"
 msgstr "Este módulo agregará automáticamente las referencias extraídas del artículo al registro DOI con Crossref. Crossref verificará automáticamente si se puede encontrar algún DOI para las referencias enviadas. Poco después de eso, puede usar el módulo para verificar las referencias DOI encontradas, ya sea automáticamente (si la opción apropiada está establecida en el módulo de exportación Crossref) o manualmente en la pestaña \"Referencias\" de envío de metadatos."
 
 msgid "plugins.generic.crossrefReferenceLinking.description.note"
 msgstr "Si cambia las referencias de un artículo después de registrar el DOI, deberá volver a registrar el DOI del artículo y verificar nuevamente los DOIs de las referencias del artículo."
 
+#, fuzzy
 msgid "plugins.generic.crossrefReferenceLinking.description.requirements"
 msgstr "Este módulo requiere que se asigne un artículo a un DOI Crossref y éste debe depositarse en Crossref desde OJS. Se pueden proporcionar las referencias del artículo en la sección Metadatos en el flujo de trabajo de los envíos."
 
@@ -43,21 +45,6 @@ msgstr "Ya está todo listo!"
 
 msgid "plugins.generic.crossrefReferenceLinking.citationsFormActionName"
 msgstr "Verificar DOIs en Crossref"
-
-msgid "plugins.generic.crossrefReferenceLinking.citationsForm.warning.toCheck"
-msgstr "Para poder verificar las referencias cruzadas DOIs necesita"
-
-msgid "plugins.generic.crossrefReferenceLinking.citationsForm.warning.extractCitations"
-msgstr "extraer y guardar las referencias aquí"
-
-msgid "plugins.generic.crossrefReferenceLinking.citationsForm.warning.assignDOI"
-msgstr "asignar un DOI al artículo"
-
-msgid "plugins.generic.crossrefReferenceLinking.citationsForm.warning.registerDOI"
-msgstr "registrar el DOI del artículo junto con las referencias extraídas con CrossRef"
-
-msgid "plugins.generic.crossrefReferenceLinking.citationsForm.warning.toCheck.ok"
-msgstr "Use el botón a continuación para verificar las citas DOIs en Crossref."
 
 msgid "plugins.generic.crossrefReferenceLinking.senderTask.name"
 msgstr "Tarea de registro automático CrossrefReferenceLinking"

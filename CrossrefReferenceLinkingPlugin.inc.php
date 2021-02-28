@@ -32,17 +32,24 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 				// register scheduled task
 				HookRegistry::register('AcronPlugin::parseCronTab', array($this, 'callbackParseCronTab'));
 
-				// references tab i.e. citation form hooks
-				HookRegistry::register('citationsform::display', array($this, 'getAdditionalCitationActionNames'));
-				HookRegistry::register('citationsform::execute', array($this, 'citationsFormExecute'));
+				// Additional fields added
+				HookRegistry::register('Schema::get::submission', array($this, 'addSubmissionSchema'));
 				HookRegistry::register('citationdao::getAdditionalFieldNames', array($this, 'getAdditionalCitationFieldNames'));
-				HookRegistry::register('Templates::Controllers::Tab::PublicationEntry::Form::CitationsForm::Citation', array($this, 'displayReferenceDOI'));
+
 				// crossref export plugin hooks
 				HookRegistry::register('articlecrossrefxmlfilter::execute', array($this, 'addCrossrefCitationsElements'));
 				HookRegistry::register('crossrefexportplugin::deposited', array($this, 'getCitationsDiagnosticId'));
-				HookRegistry::register('articledao::getAdditionalFieldNames', array(&$this, 'getAdditionalArticleFieldNames'));
+
+				// Citation Changed hook
+				HookRegistry::register('CitationDAO::afterImportCitations', array($this, 'citationsChanged'));
+
+				// Publication Published hook
+				HookRegistry::register('Publication::publish', array($this, 'checkPublicationsCitations'));
+
 				// article page hooks
 				HookRegistry::register('Templates::Article::Details::Reference', array($this, 'displayReferenceDOI'));
+				HookRegistry::register('Templates::Controllers::Tab::PublicationEntry::Form::CitationsForm::Citation', array($this, 'displayReferenceDOI'));
+
 			}
 		}
 		return $success;
@@ -68,7 +75,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 	function citationsEnabled($contextId) {
 		$contextDao = Application::getContextDAO();
 		$context = $contextDao->getById($contextId);
-		return !empty($context->getData('citations'));
+		return $context->getSetting('citations') == 'enable';
 	}
 
 	/**
@@ -151,7 +158,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 					);
 					return new JSONMessage(true);
 				}
-				return new JSONMessage(true, $settingsForm->fetch($request));
+				return new JSONMessage(true, $form->fetch($request));
 		}
 		return parent::manage($args, $request);
 	}
@@ -172,7 +179,6 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 		return false;
 	}
 
-
 	/**
 	 * Hook to articlecrossrefxmlfilter::execute and add references data to the Crossref XML export
 	 * @param $hookName string
@@ -183,12 +189,12 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 	 */
 	function addCrossrefCitationsElements($hookName, $params) {
 		$preliminaryOutput =& $params[0];
-		$request = Application::getRequest();
+		$request = Application::get()->getRequest();
 		$context = $request->getContext();
 		// if Crossref export is executed via CLI, there will be no context
 		$contextId = isset($context) ? $context->getId() : null;
-		$publishedArticleDAO = DAORegistry::getDAO('PublishedArticleDAO');
-		$citationDao = DAORegistry::getDAO('CitationDAO');
+		$publicationDAO = DAORegistry::getDAO('PublicationDAO'); /** @var $publicationDAO PublicationDAO */
+		$citationDao = DAORegistry::getDAO('CitationDAO'); /** @var $citationDao CitationDAO */
 
 		$rfNamespace = 'http://www.crossref.org/schema/4.3.6';
 		$articleNodes = $preliminaryOutput->getElementsByTagName('journal_article');
@@ -197,27 +203,37 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 			$doiNode = $doiDataNode->getElementsByTagName('doi')->item(0);
 			$doi = $doiNode->nodeValue;
 
-			$publishedArticle = $publishedArticleDAO->getPublishedArticleByPubId('doi', $doi, $contextId);
-			assert($publishedArticle);
-			$articleCitations = $citationDao->getBySubmissionId($publishedArticle->getId());
-			if ($articleCitations->getCount() != 0) {
-				$citationListNode = $preliminaryOutput->createElementNS($rfNamespace, 'citation_list');
-				while ($citation = $articleCitations->next()) {
-					$rawCitation = $citation->getRawCitation();
-					if (!empty($rawCitation)) {
-						$citationNode = $preliminaryOutput->createElementNS($rfNamespace, 'citation');
-						$citationNode->setAttribute('key', $citation->getId());
-						// if Crossref DOI already exists for this citation, include it
-						// else include unstructred raw citation
-						if ($citation->getData($this->getCitationDoiSettingName())) {
-							$citationNode->appendChild($node = $preliminaryOutput->createElementNS($rfNamespace, 'doi', htmlspecialchars($citation->getData($this->getCitationDoiSettingName()), ENT_COMPAT, 'UTF-8')));
-						} else {
-							$citationNode->appendChild($node = $preliminaryOutput->createElementNS($rfNamespace, 'unstructured_citation', htmlspecialchars($rawCitation, ENT_COMPAT, 'UTF-8')));
+			$publicationIds = $publicationDAO->getIdsBySetting('pub-id::doi', $doi, $contextId);
+
+			assert(count($publicationIds) >= 1);
+			if (count($publicationIds) >= 1) {
+				$submissionDao = DAORegistry::getDAO('SubmissionDAO');
+				$publicationService = Services::get('publication');
+				$submissionService = Services::get('submission');
+
+				$publication = $publicationService->get($publicationIds[0]);
+				$submission = $submissionService->get($publication->getData('submissionId')); /** @var $submission Submission*/
+
+				$articleCitations = $citationDao->getByPublicationId($submission->getCurrentPublication()->getId());
+				if (count($articleCitations) != 0) {
+					$citationListNode = $preliminaryOutput->createElementNS($rfNamespace, 'citation_list');
+					while ($citation = $articleCitations->next()) {
+						$rawCitation = $citation->getRawCitation();
+						if (!empty($rawCitation)) {
+							$citationNode = $preliminaryOutput->createElementNS($rfNamespace, 'citation');
+							$citationNode->setAttribute('key', $citation->getId());
+							// if Crossref DOI already exists for this citation, include it
+							// else include unstructred raw citation
+							if ($citation->getData($this->getCitationDoiSettingName())) {
+								$citationNode->appendChild($node = $preliminaryOutput->createElementNS($rfNamespace, 'doi', htmlspecialchars($citation->getData($this->getCitationDoiSettingName()), ENT_COMPAT, 'UTF-8')));
+							} else {
+								$citationNode->appendChild($node = $preliminaryOutput->createElementNS($rfNamespace, 'unstructured_citation', htmlspecialchars($rawCitation, ENT_COMPAT, 'UTF-8')));
+							}
+							$citationListNode->appendChild($citationNode);
 						}
-						$citationListNode->appendChild($citationNode);
 					}
+					$doiDataNode->parentNode->insertBefore($citationListNode, $doiDataNode->nextSibling);
 				}
-				$doiDataNode->parentNode->insertBefore($citationListNode, $doiDataNode->nextSibling);
 			}
 		}
 		return false;
@@ -246,76 +262,32 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 			//set the citations diagnostic code and the setting fot the automatic check
 			$submission->setData($this->getCitationsDiagnosticIdSettingName(), $citationsDiagnosticCode);
 			$submission->setData($this->getAutoCheckSettingName(), true);
-			$articleDao = DAORegistry::getDAO('ArticleDAO');
-			$articleDao->updateObject($submission);
+
+			$submission = Services::get('submission')->edit($submission, array(), Application::get()->getRequest());
 		}
+
 		return false;
 	}
 
 	/**
-	 * Hook callback that returns the additional article setting names
-	 * "crossref::citationsDiagnosticId" and "crossref::checkCitationsDOIs".
-	 * @see DAO::getAdditionalFieldNames()
-	 * @param $hookName string
-	 * @param $params array [
-	 *  @option ArticleDAO
-	 *  @option array List of strings representing field names
-	 * ]
+	 * Add properties to the submission entity (SchemaDAO-based)
+	 * @param $hookName string `Schema::get::submission`
+	 * @param $params array
 	 */
-	function getAdditionalArticleFieldNames($hookName, $params) {
-		$additionalFields =& $params[1];
-		$additionalFields[] = $this->getCitationsDiagnosticIdSettingName();
-		$additionalFields[] = $this->getAutoCheckSettingName();
-	}
+	function addSubmissionSchema($hookName, $args) {
+		$schema = $args[0];
 
-	/**
-	 * Add "Check Crossref DOIs" button on the citations form page.
-	 *
-	 * @param $hookName string Hook name
-	 * @param $params array [
-	 *  @option CitationsForm
-	 *  @option string the rendered form
-	 * ]
-	 * @return boolean
-	 */
-	function getAdditionalCitationActionNames($hookName, $params) {
-		$templateMgr = TemplateManager::getManager();
-		$submission = $templateMgr->getTemplateVars('submission');
-		$parsedCitations = $templateMgr->getTemplateVars('parsedCitations');
+		$schema->properties->{$this->getCitationsDiagnosticIdSettingName()} = (object) [
+			'type' => 'string',
+			'apiSummary' => true,
+			'validation' => ['nullable']
+		];
 
-		$notificationLabel = '<span class="label">'.$this->getDisplayName().'</span>';
-		if (!$parsedCitations->getCount() || !$submission->getStoredPubId('doi') || !$submission->getData($this->getCitationsDiagnosticIdSettingName())) {
-			$notificationContents = __('plugins.generic.crossrefReferenceLinking.citationsForm.warning.toCheck');
-			$checkItems = array();
-			if (!$parsedCitations->getCount()) {
-				$checkItems[] = __('plugins.generic.crossrefReferenceLinking.citationsForm.warning.extractCitations');
-			}
-			if (!$submission->getStoredPubId('doi')) {
-				$checkItems[] = __('plugins.generic.crossrefReferenceLinking.citationsForm.warning.assignDOI');
-			}
-			if (!$submission->getData($this->getCitationsDiagnosticIdSettingName())) {
-				$checkItems[] = __('plugins.generic.crossrefReferenceLinking.citationsForm.warning.registerDOI');
-			}
-			$commaSeparatedCheckItems = implode(__('common.commaListSeparator'), $checkItems);
-			$notificationContents .= ' ' . $commaSeparatedCheckItems . '.';
-		} else {
-			$notificationContents = __('plugins.generic.crossrefReferenceLinking.citationsForm.warning.toCheck.ok');
-		}
-		$notificationContents .= '<br />' . __('plugins.generic.crossrefReferenceLinking.description.note');
-		$additionalNotifications = '<div class="section">'.$notificationLabel.'<span clas="description">'.$notificationContents.'</span></div>';
-		$templateMgr->assign(array(
-			'additionalNotifications' => $additionalNotifications,
-		));
-
-		// Add "Check Crossref DOIs" button only if the submission has a DOI and the references were deposited
-		if ($parsedCitations->getCount() && $submission->getStoredPubId('doi') && $submission->getData($this->getCitationsDiagnosticIdSettingName())) {
-			$actionNames = $templateMgr->getTemplateVars('actionNames');
-			$actionNames['getDois'] = __('plugins.generic.crossrefReferenceLinking.citationsFormActionName');
-			$templateMgr->assign(array(
-				'actionNames' => $actionNames,
-			));
-		}
-		return false;
+		$schema->properties->{$this->getAutoCheckSettingName()} = (object) [
+			'type' => 'boolean',
+			'apiSummary' => true,
+			'validation' => ['nullable']
+		];
 	}
 
 	/**
@@ -335,64 +307,94 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 	}
 
 	/**
-	 * Hook to the CitationForm::execute function.
-	 *
-	 * @param $hookName string Hook name
+	 * Resets the submission data related to Reference Linking Plugin.
+	 * Used every time the citations for a certain publication are imported.
+	 * @param $hookName string CitationDAO::afterImportCitations
 	 * @param $params array [
-	 *  @option CitationsForm
-	 *  @option PKPRequest
+	 *  @option integer publicationId The publicationId for which the citations are imported
 	 * ]
-	 * @return boolean
 	 */
-	function citationsFormExecute($hookName, $params) {
-		$form =& $params[0];
-		$request =& $params[1];
-		$submission = $form->getSubmission();
-		if ($request->getUserVar('parse') && $submission->getData($this->getCitationsDiagnosticIdSettingName())) {
-			// If the button "Extract and Save References" is used, the article citations will be removed and inserted anew
-			// If the article DOI was already registered together with the references
-			// the setting name citationsDiagnosticId has to be removed, so that the plugin knows that
-			// the article DOI should be registered anew, before the possibility to "Check Crossref DOIs"
+	function citationsChanged($hookName, $params) {
+		$publicationId = $params[0];
+
+		$publication = Services::get('publication')->get($publicationId);
+		$submission = Services::get('submission')->get($publication->getData('submissionId'));
+
+		if ($submission->getData($this->getCitationsDiagnosticIdSettingName())) {
 			$submission->setData($this->getCitationsDiagnosticIdSettingName(), null);
 			$submission->setData($this->getAutoCheckSettingName(), null);
-			$articleDao = DAORegistry::getDAO('ArticleDAO');
-			$articleDao->updateObject($submission);
-		} elseif ($request->getUserVar('getDois')) {
-			// If the button "Check Crossref DOIs" is used, get the found Crossref references DOIs.
-			// It is enough to check if citations diagnostic ID exist -- it only exists
-			// if a DOI with references is successfully registered
-			if ($submission->getData($this->getCitationsDiagnosticIdSettingName())) {
-				$this->getCrossrefReferencesDOIs($submission);
-			}
+
+			$submission = Services::get('submission')->edit($submission, array(), Application::get()->getRequest());
 		}
+
 		return false;
 	}
 
 	/**
-	 * Get found Crossref references DOIs for the given article DOI.
-	 * @param $submission PublishedArticle
+	 * A certain submission is being checked for reference linking
+	 * Used every time the publication is being published.
+	 * @param $hookName string Publication::publish
+	 * @param $params array [
+	 *  @option Publication The newPublication after it's published
+	 *  @option Publication The publication before it's published
+	 *  @option Submission The submission related to the published publication
+	 * ]
 	 */
-	function getCrossrefReferencesDOIs($submission) {
-		$doi = urlencode($submission->getStoredPubId('doi'));
-		if (!empty($doi)){
-			$citationDao = DAORegistry::getDAO('CitationDAO');
-			$articleDao = DAORegistry::getDAO('ArticleDAO');
-			$citationsToCheck = $citationDao->getCitationsBySetting($this->getCitationDoiSettingName(), null, $submission->getId());
-			$citationsToCheckKeys = array_keys($citationsToCheck);
-			if (!empty($citationsToCheckKeys)) {
-				$matchedReferences = $this->_getResolvedRefs($doi, $submission->getContextId());
+	function checkPublicationsCitations($hookName, $params) {
+		$newPublication =& $params[0]; /** @var $newPublication Publication */
+		$publication =& $params[1]; /** @var $publication Publication */
+		$submission =& $params[2]; /** @var $submission Submission */
+
+		$request = PKPApplication::get()->getRequest();
+
+		if ($submission->getData($this->getCitationsDiagnosticIdSettingName())) {
+			$this->getCrossrefReferencesDOIs($publication);
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get found Crossref references DOIs for the given publication DOI.
+	 * @param $publication Publication
+	 */
+	function getCrossrefReferencesDOIs($publication) {
+		$doi = urlencode($publication->getStoredPubId('doi'));
+
+		if (!empty($doi)) {
+			$citationDao = DAORegistry::getDAO('CitationDAO'); /** @var $citationDao CitationDAO */
+			$submissionDao = DAORegistry::getDAO('SubmissionDAO'); /** @var $submissionDao SubmissionDAO */
+
+			$citations = $citationDao->getByPublicationId($publication->getId())->toAssociativeArray();
+
+			$citationsToCheck = array();
+			foreach ($citations as $citation) { /** @var $citation Citation */
+				if (!$citation->getData($this->getCitationDoiSettingName())) {
+					$citationsToCheck[$citation->getId()] = $citation;
+				}
+			}
+
+			if (!empty($citationsToCheck)) {
+				$citationsToCheckKeys = array_keys($citationsToCheck);
+
+				$submission = Services::get('submission')->get($publication->getData('submissionId'));
+
+				$matchedReferences = $this->_getResolvedRefs($doi, $submission->getData('contextId'));
 				if ($matchedReferences) {
 					$filteredMatchedReferences = array_filter($matchedReferences, function ($value) use ($citationsToCheckKeys) {
 						return in_array($value['key'], $citationsToCheckKeys);
 					});
+
 					foreach ($filteredMatchedReferences as $matchedReference) {
 						$citation = $citationsToCheck[$matchedReference['key']];
 						$citation->setData($this->getCitationDoiSettingName(), $matchedReference['doi']);
 						$citationDao->updateObject($citation);
 					}
+
 					// remove auto check setting
 					$submission->setData($this->getAutoCheckSettingName(), null);
-					$articleDao->updateObject($submission);
+
+					$submission = Services::get('submission')->edit($submission, array(), Application::get()->getRequest());
 				}
 			}
 		}
@@ -448,20 +450,23 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 	}
 
 	/**
-	 * Retrieve all articles that should be automatically checked for the found Crossref citations DOIs.
+	 * Retrieve all submissions that should be automatically checked for the found Crossref citations DOIs.
 	 * @param $context Context
-	 * @return DAOResultFactory
+	 * @return array Submission
 	 */
-	function getArticlesToCheck($context) {
+	function getSubmissionsToCheck($context) {
 		// Retrieve all published articles with their DOIs depositted together with the references.
 		// i.e. with the citations diagnostic ID setting
-		$publishedArticleDao = DAORegistry::getDAO('PublishedArticleDAO'); /* @var $publishedArticleDao PublishedArticleDAO */
-		$articles = $publishedArticleDao->getBySetting(
-			$this->getAutoCheckSettingName(),
-			true,
-			$context->getId()
-		);
-		return $articles;
+		$submissionDao = DAORegistry::getDAO('SubmissionDAO'); /** @var $submissionDao SubmissionDAO */
+		$submissionIds = $submissionDao->getIdsBySetting($this->getAutoCheckSettingName(), true, $context->getId());
+
+		$submissions = array_map(function($submissionId) {
+			return Services::get('submission')->get($submissionId);
+		}, $submissionIds);
+
+		return array_filter($submissions, function($submission) {
+			return $submission->getData('status') === STATUS_PUBLISHED;
+		});
 	}
 
 	/**
@@ -472,15 +477,6 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 	 */
 	function _getResolvedRefs($doi, $contextId) {
 		$matchedReferences = null;
-		$curlCh = curl_init();
-		if ($httpProxyHost = Config::getVar('proxy', 'http_host')) {
-			curl_setopt($curlCh, CURLOPT_PROXY, $httpProxyHost);
-			curl_setopt($curlCh, CURLOPT_PROXYPORT, Config::getVar('proxy', 'http_port', '80'));
-			if ($username = Config::getVar('proxy', 'username')) {
-				curl_setopt($curlCh, CURLOPT_PROXYUSERPWD, $username . ':' . Config::getVar('proxy', 'password'));
-			}
-		}
-		curl_setopt($curlCh, CURLOPT_RETURNTRANSFER, true);
 
 		PluginRegistry::loadCategory('importexport');
 		$crossrefExportPlugin = PluginRegistry::getPlugin('importexport', 'CrossRefExportPlugin');
@@ -490,16 +486,22 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 		// Use a different endpoint for testing and production.
 		$isTestMode = $crossrefExportPlugin->getSetting($contextId, 'testMode') == 1;
 		$endpoint = ($isTestMode ? CROSSREF_API_REFS_URL_DEV : CROSSREF_API_REFS_URL);
-		curl_setopt($curlCh, CURLOPT_URL, $endpoint.$doi.'&usr='.$username.'&pwd='.$password);
 
-		$response = curl_exec($curlCh);
-		if ($response && curl_getinfo($curlCh, CURLINFO_HTTP_CODE) == 200)  {
-			$response = json_decode($response, true);
+		$url = $endpoint.$doi.'&usr='.$username.'&pwd='.$password;
+
+		$httpClient = Application::get()->getHttpClient();
+		try {
+			$response = $httpClient->request('POST', $url);
+		} catch (GuzzleHttp\Exception\RequestException $e) {
+			return null;
+		}
+
+		if ($response && $response->getStatusCode() == 200)  {
+			$response = json_decode($response->getBody(), true);
 			$matchedReferences = $response['matched-references'];
 		}
-		curl_close($curlCh);
+
 		return $matchedReferences;
 	}
-
 }
 
