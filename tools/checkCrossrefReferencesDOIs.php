@@ -3,8 +3,8 @@
 /**
  * @file tools/checkCrossrefReferencesDOIs.php
  *
- * Copyright (c) 2014-2020 Simon Fraser University
- * Copyright (c) 2003-2020 John Willinsky
+ * Copyright (c) 2014-2021 Simon Fraser University
+ * Copyright (c) 2003-2021 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file LICENSE.
  *
  * @class CrossrefReferencesDOIsTool
@@ -85,7 +85,7 @@ class CrossrefReferencesDOIsTool extends CommandLineTool {
 						continue;
 					}
 					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $submission->getContextId());
-					$plugin->getCrossrefReferencesDOIs($submission);
+					$plugin->getCrossrefReferencesDOIs($submission->getCurrentPublication());
 				}
 				break;
 			default:

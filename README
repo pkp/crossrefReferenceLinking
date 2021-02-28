@@ -1,12 +1,12 @@
 =============================================================
 === CrossrefReferenceLinking plugin
-=== Version: 1.0.1
+=== Version: 1.0.2
 =============================================================
 
 
 About
 -----
-This plugin will automatically add the extracted article references to the DOI registration with Crossref. Crossref will then automatically check if any DOIs can be found for the submitted references. Shortly after that, the user can use the plugin to check for the found references DOIs. If article references change once they are registered, the article DOI with the new references will have to be registered anew. Then the check for the found references DOIs will be done again.
+This plugin will automatically add the extracted article references to the DOI registration with Crossref. Crossref will then automatically check if any DOIs can be found for the submitted references. Shortly after that, using the scheduled task, the plugin will check for the found references DOIs. If article references change once they are registered, the article DOI with the new references will have to be registered anew. Then the check for the found references DOIs will be done again.
 This plugin requires Crossref DOIs to be assigned to articles, article references to be separately entered and extracted, as well as article DOIs to be deposited to Crossref from within OJS. It uses the Crossref Export/Registration plugin settings: Crossref credentials (username and password), as well as the setting for the testing mode.
 
 License
@@ -16,13 +16,13 @@ LICENSE for the complete terms of this license.
 
 System Requirements
 -------------------
-OJS 3.2
+OJS 3.3
 
 Installation
 ------------
 There are three ways of installing the plugin:
- * Plugin Gallery
- * Access your journal's plugin gallery as Site Administrator and install the plugin there.
+ * Plugin Gallery:
+   * Access your journal's plugin gallery as Site Administrator and install the plugin there.
  * Manual installation (not recommended):
    * Copy the release source or unpack the release package into the OJS plugins/generic/crossrefReferenceLinking/ folder.
    * Run `php tools/upgrade.php upgrade` from the OJS folder.

@@ -3,8 +3,8 @@
 /**
  * @file CrossrefReferenceLinkingPlugin.inc.php
  *
- * Copyright (c) 2013-2020 Simon Fraser University
- * Copyright (c) 2003-2020 John Willinsky
+ * Copyright (c) 2013-2021 Simon Fraser University
+ * Copyright (c) 2003-2021 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file LICENSE.
  *
  * @class CrossrefReferenceLinkingPlugin
@@ -333,6 +333,11 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 	/**
 	 * A certain submission is being checked for reference linking
 	 * Used every time the publication is being published.
+	 * This only applies/makes sense when:
+	 *  1) the publication is published
+	 *  2) Crossref DOIs for the article deposited
+	 *  3) the publication unpublished and then published again.
+	 *
 	 * @param $hookName string Publication::publish
 	 * @param $params array [
 	 *  @option Publication The newPublication after it's published
