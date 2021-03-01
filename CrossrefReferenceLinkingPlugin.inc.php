@@ -215,9 +215,10 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 				$submission = $submissionService->get($publication->getData('submissionId')); /** @var $submission Submission*/
 
 				$articleCitations = $citationDao->getByPublicationId($submission->getCurrentPublication()->getId());
-				if (count($articleCitations) != 0) {
+				$articleCitationsArray = $articleCitations->toArray();
+				if (!empty($articleCitationsArray)) {
 					$citationListNode = $preliminaryOutput->createElementNS($rfNamespace, 'citation_list');
-					while ($citation = $articleCitations->next()) {
+					foreach($articleCitationsArray as $citation) {
 						$rawCitation = $citation->getRawCitation();
 						if (!empty($rawCitation)) {
 							$citationNode = $preliminaryOutput->createElementNS($rfNamespace, 'citation');
@@ -378,7 +379,6 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 					$citationsToCheck[$citation->getId()] = $citation;
 				}
 			}
-
 			if (!empty($citationsToCheck)) {
 				$citationsToCheckKeys = array_keys($citationsToCheck);
 
