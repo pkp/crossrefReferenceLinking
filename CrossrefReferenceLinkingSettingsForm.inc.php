@@ -89,7 +89,7 @@ class CrossrefReferenceLinkingSettingsForm extends Form {
 	/**
 	 * @copydoc Form::fetch()
 	 */
-	function fetch($request) {
+	function fetch($request, $template = NULL, $display = false) {
 		$plugin = $this->_getPlugin();
 		$contextId = $request->getContext()->getId();
 		$dispatcher = $request->getDispatcher();
@@ -132,7 +132,7 @@ class CrossrefReferenceLinkingSettingsForm extends Form {
 	/**
 	 * @copydoc Form::execute()
 	 */
-	function execute($object = null) {
+	function execute(...$functionArgs) {
 		$plugin = $this->_getPlugin();
 		$contextId = $this->_getContextId();
 		foreach($this->getFormFields() as $fieldName => $fieldType) {

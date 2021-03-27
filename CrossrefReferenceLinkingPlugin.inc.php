@@ -75,7 +75,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 	function citationsEnabled($contextId) {
 		$contextDao = Application::getContextDAO();
 		$context = $contextDao->getById($contextId);
-		return $context->getSetting('citations') == 'enable';
+		return !empty($context->getSetting('citations'));
 	}
 
 	/**
