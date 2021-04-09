@@ -64,7 +64,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 		// If crossref export plugin is set i.e. the crossref credentials exist we can assume that DOI plugin is set correctly
 		PluginRegistry::loadCategory('importexport');
 		$crossrefExportPlugin = PluginRegistry::getPlugin('importexport', 'CrossRefExportPlugin');
-		return $crossrefExportPlugin->getSetting($contextId, 'username') && $crossrefExportPlugin->getSetting($contextId, 'password');
+		return $crossrefExportPlugin && $crossrefExportPlugin->getSetting($contextId, 'username') && $crossrefExportPlugin->getSetting($contextId, 'password');
 	}
 
 	/**
