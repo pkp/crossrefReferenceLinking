@@ -15,34 +15,34 @@ msgid "plugins.generic.crossrefReferenceLinking.displayName"
 msgstr "Crossref Reference Linking"
 
 msgid "plugins.generic.crossrefReferenceLinking.description"
-msgstr "Dieses Plugin übermittelt die Referenzen der Literaturliste an Crossref sobald ein DOI registiert wird und bildet automatisch DOIs an, die der Crossref Datenbank gefunden werden."
+msgstr "Dieses Plugin übermittelt die Referenzen der Literaturliste an Crossref sobald ein DOI registiert wird und bildet automatisch DOIs ab, die in der Crossref Datenbank gefunden werden."
 
 msgid "plugins.generic.crossrefReferenceLinking.description.long"
-msgstr "Dieses Plugin fügt die Literaturliste zur DOI Registrierung bei Crossref hinzu. Crossref wird dann automatisch prüfen, ob DOIs in den übermittelten Referenzen gefunden werden. Scheduled tasks werden dann die gefundenen DOI überprüfen."
+msgstr "Dieses Plugin fügt die Literaturliste zur DOI Registrierung bei Crossref hinzu. Crossref wird dann automatisch prüfen, ob DOIs in den übermittelten Referenzen gefunden werden. Ein Scheduled task wird dann die gefundenen DOI überprüfen."
 
 msgid "plugins.generic.crossrefReferenceLinking.description.note"
-msgstr "Sobald nach der Registrierung einer DOI Änderungen an der Literatur gemacht werden, muss die DOi erneut registriert werden, damit die DOI Referenzen erneut geprüft werden."
+msgstr "Sobald nach der Registrierung einer DOI, Änderungen an der Literatur gemacht werden, muss die DOi erneut registriert werden, damit die DOI Referenzen erneut geprüft werden."
 
 msgid "plugins.generic.crossrefReferenceLinking.description.requirements"
-msgstr "Dieses Plugin erfordert, dass Crossref DOI innerhalb OJS an Artikel vergeben und registriert werden. Literaturlisten und Referenzen  Article references can be provided in the References section in the Publication tab of each submission."
+msgstr "Dieses Plugin erfordert, dass Crossref DOI innerhalb OJS an Artikel vergeben und registriert werden. Literaturlisten und Referenzen können im Tab "veröffentlichung -> "Literatur" einer Einreichung eingegeben werden."
 
 msgid "plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings"
-msgstr "Crossref XML Export Plugin Settings"
+msgstr "Einstellungen des Crossref XML Export Plugin"
 
 msgid "plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings.required"
-msgstr "Crossref username and password must be configured:"
+msgstr "Crossref Benutzername und Passwort müssen gesetzt werden:"
 
 msgid "plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings"
-msgstr "Submission Metadata Settings"
+msgstr "Einstellunegn der Einreichungs-Metadaten"
 
 msgid "plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings.required"
-msgstr "Submission references metadata must be enabled:"
+msgstr "Literatur der Einreichung müssen aktiviert sein:"
 
 msgid "plugins.generic.crossrefReferenceLinking.settings.form.requirements.ok"
-msgstr "You're all set up!"
+msgstr "Alles gut jetzt!"
 
 msgid "plugins.generic.crossrefReferenceLinking.citationsFormActionName"
-msgstr "Check Crossref DOIs"
+msgstr "Crossref DOIs überprüfen"
 
 msgid "plugins.generic.crossrefReferenceLinking.senderTask.name"
-msgstr "CrossrefReferenceLinking automatic registration task"
+msgstr "Automatische CrossrefReferenceLinking Registrierungsaufgabe"
