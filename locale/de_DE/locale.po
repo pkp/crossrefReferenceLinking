@@ -21,7 +21,7 @@ msgid "plugins.generic.crossrefReferenceLinking.description.long"
 msgstr "Dieses Plugin fügt die Literaturliste zur DOI Registrierung bei Crossref hinzu. Crossref wird dann automatisch prüfen, ob DOIs in den übermittelten Referenzen gefunden werden. Ein Scheduled task wird dann die gefundenen DOI überprüfen."
 
 msgid "plugins.generic.crossrefReferenceLinking.description.note"
-msgstr "Sobald nach der Registrierung einer DOI, Änderungen an der Literatur gemacht werden, muss die DOi erneut registriert werden, damit die DOI Referenzen erneut geprüft werden."
+msgstr "Sobald nach der Registrierung einer DOI, Änderungen an der Literatur gemacht werden, muss die DOI erneut registriert werden, damit die DOI Referenzen erneut geprüft werden."
 
 msgid "plugins.generic.crossrefReferenceLinking.description.requirements"
 msgstr "Dieses Plugin erfordert, dass Crossref DOI innerhalb OJS an Artikel vergeben und registriert werden. Literaturlisten und Referenzen können im Tab "veröffentlichung -> "Literatur" einer Einreichung eingegeben werden."
