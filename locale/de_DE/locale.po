@@ -1,0 +1,48 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2021-07-17T01:15:08+00:00\n"
+"PO-Revision-Date: 2021-07-17T01:15:08+00:00\n"
+"Language: \n"
+
+msgid "plugins.generic.crossrefReferenceLinking.displayName"
+msgstr "Crossref Reference Linking"
+
+msgid "plugins.generic.crossrefReferenceLinking.description"
+msgstr "Dieses Plugin übermittelt die Referenzen der Literaturliste an Crossref sobald ein DOI registiert wird und bildet automatisch DOIs ab, die in der Crossref Datenbank gefunden werden."
+
+msgid "plugins.generic.crossrefReferenceLinking.description.long"
+msgstr "Dieses Plugin fügt die Literaturliste zur DOI Registrierung bei Crossref hinzu. Crossref wird dann automatisch prüfen, ob DOIs in den übermittelten Referenzen gefunden werden. Ein Scheduled task wird dann die gefundenen DOI überprüfen."
+
+msgid "plugins.generic.crossrefReferenceLinking.description.note"
+msgstr "Sobald nach der Registrierung einer DOI, Änderungen an der Literatur gemacht werden, muss die DOI erneut registriert werden, damit die DOI Referenzen erneut geprüft werden."
+
+msgid "plugins.generic.crossrefReferenceLinking.description.requirements"
+msgstr "Dieses Plugin erfordert, dass Crossref DOI innerhalb OJS an Artikel vergeben und registriert werden. Literaturlisten und Referenzen können im Tab 'Veröffentlichung' -> 'Literatur' einer Einreichung eingegeben werden."
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings"
+msgstr "Einstellungen des Crossref XML Export Plugin"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings.required"
+msgstr "Crossref Benutzername und Passwort müssen gesetzt werden:"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings"
+msgstr "Einstellunegn der Einreichungs-Metadaten"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings.required"
+msgstr "Literatur der Einreichung müssen aktiviert sein:"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.requirements.ok"
+msgstr "Alles gut jetzt!"
+
+msgid "plugins.generic.crossrefReferenceLinking.citationsFormActionName"
+msgstr "Crossref DOIs überprüfen"
+
+msgid "plugins.generic.crossrefReferenceLinking.senderTask.name"
+msgstr "Automatische CrossrefReferenceLinking Registrierungsaufgabe"
