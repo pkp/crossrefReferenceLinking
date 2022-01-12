@@ -1,0 +1,48 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: Martin Brändle\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2020-02-28T01:15:08+00:00\n"
+"PO-Revision-Date: 2022-01-12T01:15:00+00:00\n"
+"Language: fr_FR\n"
+
+msgid "plugins.generic.crossrefReferenceLinking.displayName"
+msgstr "Crossref Reference Linking"
+
+msgid "plugins.generic.crossrefReferenceLinking.description"
+msgstr "Ce plugin soumet les références des articles à Crossref lorsqu'un DOI est enregistré et affiche automatiquement les DOI des références trouvées dans la base de données de Crossref."
+
+msgid "plugins.generic.crossrefReferenceLinking.description.long"
+msgstr "Ce plugin ajoutera automatiquement les références d'articles extraites à l'enregistrement des DOI auprès de Crossref. Crossref vérifiera alors automatiquement si des DOIs peuvent être trouvés pour les références soumises. En utilisant la tâche planifiée, le plugin vérifiera alors les DOIs des références trouvées."
+
+msgid "plugins.generic.crossrefReferenceLinking.description.note"
+msgstr "Si vous modifiez les références d'un article après avoir enregistré le DOI, vous devrez enregistrer à nouveau le DOI de l'article et vérifier les DOI des références de l'article."
+
+msgid "plugins.generic.crossrefReferenceLinking.description.requirements"
+msgstr "Ce plugin exige qu'un article se voie attribuer un DOI Crossref et que ce DOI soit déposé auprès de Crossref à partir d'OJS. Les références des articles peuvent être fournies dans la section Références de l'onglet Publication de chaque soumission."
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings"
+msgstr "Paramètres du plugin d'exportation Crossref XML"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings.required"
+msgstr "Le nom d'utilisateur et le mot de passe de Crossref doivent être configurés :"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings"
+msgstr "Paramètres des métadonnées de la soumission"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings.required"
+msgstr "Les métadonnées de références de la soumission doivent être activées :"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.requirements.ok"
+msgstr "Tout est prêt !"
+
+msgid "plugins.generic.crossrefReferenceLinking.citationsFormActionName"
+msgstr "Vérifier les DOI de Crossref"
+
+msgid "plugins.generic.crossrefReferenceLinking.senderTask.name"
+msgstr "Tâche d'enregistrement automatique CrossrefReferenceLinking"
