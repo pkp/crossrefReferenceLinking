@@ -1,0 +1,48 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: Martin Brändle\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2020-02-28T01:15:08+00:00\n"
+"PO-Revision-Date: 2020-02-28T01:15:08+00:00\n"
+"Language: it_IT\n"
+
+msgid "plugins.generic.crossrefReferenceLinking.displayName"
+msgstr "Crossref Reference Linking"
+
+msgid "plugins.generic.crossrefReferenceLinking.description"
+msgstr "Questo plugin invia i riferimenti degli articoli a Crossref quando un DOI è registrato e visualizza automaticamente i DOI per i riferimenti trovati nel database di Crossref."
+
+msgid "plugins.generic.crossrefReferenceLinking.description.long"
+msgstr "uesto plugin aggiungerà automaticamente i riferimenti degli articoli estratti alla registrazione DOI con Crossref. Crossref controllerà quindi automaticamente se è possibile trovare un DOI per i riferimenti inviati. Utilizzando l'attività programmata il plugin controllerà poi i DOI dei riferimenti trovati."
+
+msgid "plugins.generic.crossrefReferenceLinking.description.note"
+msgstr "Se si cambiano i riferimenti di un articolo dopo aver registrato il DOI, è necessario registrare nuovamente il DOI dell'articolo e controllare i DOI dei riferimenti dell'articolo."
+
+msgid "plugins.generic.crossrefReferenceLinking.description.requirements"
+msgstr "Questo plugin richiede che ad un articolo sia assegnato un DOI Crossref e che questo DOI sia depositato presso Crossref dall'interno di OJS. I riferimenti dell'articolo possono essere forniti nella sezione Riferimenti bibliografici nella scheda Pubblicazione di ogni sottomissione."
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings"
+msgstr "Impostazioni del plugin di esportazione XML di Crossref"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings.required"
+msgstr "Il nome utente e la password di Crossref devono essere configurati:"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings"
+msgstr "Impostazioni dei metadati della sottomissione"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings.required"
+msgstr "I metadati dei riferimenti della sottomissione devono essere abilitati"
+
+msgid "plugins.generic.crossrefReferenceLinking.settings.form.requirements.ok"
+msgstr "È tutto pronto!"
+
+msgid "plugins.generic.crossrefReferenceLinking.citationsFormActionName"
+msgstr "Controllare i DOI di Crossref"
+
+msgid "plugins.generic.crossrefReferenceLinking.senderTask.name"
+msgstr "Compito di registrazione automatica di CrossrefReferenceLinking"
