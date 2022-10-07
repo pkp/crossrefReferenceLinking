@@ -8,4 +8,4 @@
  * Display reference DOI on the article metadata (backend) and article view page (frontend)
  *}
  
-DOI: <a href="{$crossrefFullUrl|escape}">{$crossrefFullUrl|escape}</a>
+<a href="{$crossrefFullUrl|escape}">{$crossrefFullUrl|escape}</a>
