@@ -1,41 +1,45 @@
 <?php
 
 /**
- * @file tools/checkCrossrefReferencesDOIs.php
+ * @file plugins/generic/crossrefReferenceLinking/tools/checkCrossrefReferencesDOIs.php
  *
- * Copyright (c) 2014-2021 Simon Fraser University
- * Copyright (c) 2003-2021 John Willinsky
+ * Copyright (c) 2014-2023 Simon Fraser University
+ * Copyright (c) 2003-2023 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file LICENSE.
  *
  * @class CrossrefReferencesDOIsTool
- * @ingroup plugins_generic_crossrefReferenceLinking
- *
  * @brief CLI tool to check found Crossref citations DOIs
  */
 
-require(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/tools/bootstrap.inc.php');
+require(dirname(__FILE__, 5) . '/tools/bootstrap.php');
 
-class CrossrefReferencesDOIsTool extends CommandLineTool {
+use APP\core\Application;
+use APP\facades\Repo;
+use PKP\plugins\PluginRegistry;
+
+class CrossrefReferencesDOIsTool extends \PKP\cliTool\CommandLineTool
+{
+	public array $parameters;
 
 	/**
 	 * Constructor.
 	 * @param $argv array command-line arguments
 	 */
-	function __construct($argv = array()) {
+	public function __construct($argv = array())
+	{
 		parent::__construct($argv);
-
 		if (!sizeof($this->argv)) {
 			$this->usage();
 			exit(1);
 		}
-
 		$this->parameters = $this->argv;
 	}
 
 	/**
 	 * Print command usage information.
 	 */
-	function usage() {
+	public function usage()
+	{
 		echo _('plugins.generic.crossrefReferenceLinking.citationsFormActionName') . "\n"
 			. "Usage:\n"
 			. "{$this->scriptName} all\n"
@@ -46,18 +50,18 @@ class CrossrefReferencesDOIsTool extends CommandLineTool {
 	/**
 	 * Check citations DOIs
 	 */
-	function execute() {
-		$submissionDao = DAORegistry::getDAO('SubmissionDAO');
+	public function execute()
+	{
 		$contextDao = Application::getContextDAO();
 
 		switch(array_shift($this->parameters)) {
 			case 'all':
 				$contexts = $contextDao->getAll();
 				while ($context = $contexts->next()) {
-					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $context->getId());
+					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $context->getId()); /** @var CrossrefReferenceLinkingPlugin $plugin */
 					// Get published articles to check
 					$submissionsToCheck = $plugin->getSubmissionsToCheck($context);
-					foreach ($submissionsToCheck as $submissionToCheck) { /** @var $submissionToCheck Submission */
+					foreach ($submissionsToCheck as $submissionToCheck) { /** @var Submission $submissionToCheck */
 						$plugin->getCrossrefReferencesDOIs($submissionToCheck->getCurrentPublication());
 					}
 				}
@@ -69,22 +73,22 @@ class CrossrefReferencesDOIsTool extends CommandLineTool {
 						printf("Error: Skipping $contextId. Unknown context.\n");
 						continue;
 					}
-					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $context->getId());
+					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $context->getId()); /** @var CrossrefReferenceLinkingPlugin $plugin */
 					// Get published articles to check
 					$submissionsToCheck = $plugin->getSubmissionsToCheck($context);
-					foreach ($submissionsToCheck as $submissionToCheck) { /** @var $submissionToCheck Submission */
+					foreach ($submissionsToCheck as $submissionToCheck) { /** @var Submission $submissionToCheck */
 						$plugin->getCrossrefReferencesDOIs($submissionToCheck->getCurrentPublication());
 					}
 				}
 				break;
 			case 'submission':
 				foreach($this->parameters as $submissionId) {
-					$submission = $submissionDao->getById($submissionId);
+					$submission = Repo::submission()->get($submissionId);
 					if(!isset($submission)) {
 						printf("Error: Skipping $submissionId. Unknown submission.\n");
 						continue;
 					}
-					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $submission->getContextId());
+					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $submission->getData('contextId')); /** @var CrossrefReferenceLinkingPlugin $plugin */
 					$plugin->getCrossrefReferencesDOIs($submission->getCurrentPublication());
 				}
 				break;
