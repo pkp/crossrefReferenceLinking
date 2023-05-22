@@ -26,18 +26,9 @@ use PKP\linkAction\request\RedirectAction;
 
 class CrossrefReferenceLinkingSettingsForm extends Form
 {
-
-	public int $contextId;
-
-	public CrossrefReferenceLinkingPlugin $plugin;
-
-	public function __construct(CrossrefReferenceLinkingPlugin $plugin, int $contextId)
+	public function __construct(public CrossrefReferenceLinkingPlugin $plugin, public int $contextId)
 	{
-		$this->contextId = $contextId;
-		$this->plugin = $plugin;
-
 		parent::__construct($plugin->getTemplateResource('settingsForm.tpl'));
-
 		$this->addCheck(new FormValidatorPost($this));
 		$this->addCheck(new FormValidatorCSRF($this));
 	}
@@ -45,14 +36,13 @@ class CrossrefReferenceLinkingSettingsForm extends Form
 	/**
 	 * @copydoc Form::fetch()
 	 */
-	public function fetch($request, $template = NULL, $display = false)
+	public function fetch($request, $template = NULL, $display = false): string
 	{
 		$dispatcher = $request->getDispatcher();
 		$templateMgr = TemplateManager::getManager($request);
 		$templateMgr->assign('pluginName', $this->plugin->getName());
-		if (!$this->plugin->crossrefCredentials($this->contextId)) {
+		if (!$this->plugin->hasCrossrefCredentials($this->contextId)) {
 			// Settings > Distribution > DOIs > Registration
-			import('lib.pkp.classes.linkAction.request.RedirectAction');
 			$crossrefSettingsLinkAction = new LinkAction(
 					'settings',
 					new RedirectAction($dispatcher->url(
@@ -68,7 +58,6 @@ class CrossrefReferenceLinkingSettingsForm extends Form
 		}
 		if (!$this->plugin->citationsEnabled($this->contextId)) {
 			// Settings > Workflow > Submission > Metadata
-			import('lib.pkp.classes.linkAction.request.RedirectAction');
 			$submissionSettingsLinkAction = new LinkAction(
 				'settings',
 				new RedirectAction($dispatcher->url(

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @file plugins/generic/crossrefReferenceLinking/tools/checkCrossrefReferencesDOIs.php
+ * @file tools/checkCrossrefReferencesDOIs.php
  *
  * Copyright (c) 2014-2023 Simon Fraser University
  * Copyright (c) 2003-2023 John Willinsky
@@ -25,7 +25,7 @@ class CrossrefReferencesDOIsTool extends \PKP\cliTool\CommandLineTool
 	 * Constructor.
 	 * @param $argv array command-line arguments
 	 */
-	public function __construct($argv = array())
+	public function __construct($argv = [])
 	{
 		parent::__construct($argv);
 		if (!sizeof($this->argv)) {
@@ -38,7 +38,7 @@ class CrossrefReferencesDOIsTool extends \PKP\cliTool\CommandLineTool
 	/**
 	 * Print command usage information.
 	 */
-	public function usage()
+	public function usage(): void
 	{
 		echo _('plugins.generic.crossrefReferenceLinking.citationsFormActionName') . "\n"
 			. "Usage:\n"
@@ -50,7 +50,7 @@ class CrossrefReferencesDOIsTool extends \PKP\cliTool\CommandLineTool
 	/**
 	 * Check citations DOIs
 	 */
-	public function execute()
+	public function execute(): void
 	{
 		$contextDao = Application::getContextDAO();
 
@@ -62,7 +62,7 @@ class CrossrefReferencesDOIsTool extends \PKP\cliTool\CommandLineTool
 					// Get published articles to check
 					$submissionsToCheck = $plugin->getSubmissionsToCheck($context);
 					foreach ($submissionsToCheck as $submissionToCheck) { /** @var Submission $submissionToCheck */
-						$plugin->getCrossrefReferencesDOIs($submissionToCheck->getCurrentPublication());
+						$plugin->considerFoundCrossrefReferencesDOIs($submissionToCheck->getCurrentPublication());
 					}
 				}
 				break;
@@ -77,7 +77,7 @@ class CrossrefReferencesDOIsTool extends \PKP\cliTool\CommandLineTool
 					// Get published articles to check
 					$submissionsToCheck = $plugin->getSubmissionsToCheck($context);
 					foreach ($submissionsToCheck as $submissionToCheck) { /** @var Submission $submissionToCheck */
-						$plugin->getCrossrefReferencesDOIs($submissionToCheck->getCurrentPublication());
+						$plugin->considerFoundCrossrefReferencesDOIs($submissionToCheck->getCurrentPublication());
 					}
 				}
 				break;
@@ -89,7 +89,7 @@ class CrossrefReferencesDOIsTool extends \PKP\cliTool\CommandLineTool
 						continue;
 					}
 					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $submission->getData('contextId')); /** @var CrossrefReferenceLinkingPlugin $plugin */
-					$plugin->getCrossrefReferencesDOIs($submission->getCurrentPublication());
+					$plugin->considerFoundCrossrefReferencesDOIs($submission->getCurrentPublication());
 				}
 				break;
 			default:
@@ -99,5 +99,5 @@ class CrossrefReferencesDOIsTool extends \PKP\cliTool\CommandLineTool
 	}
 }
 
-$tool = new CrossrefReferencesDOIsTool(isset($argv) ? $argv : array());
+$tool = new CrossrefReferencesDOIsTool(isset($argv) ? $argv : []);
 $tool->execute();

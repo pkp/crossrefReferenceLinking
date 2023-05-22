@@ -14,7 +14,7 @@
   -->
 <!DOCTYPE scheduled_tasks SYSTEM "../../../lib/pkp/dtd/scheduledTasks.dtd">
 <scheduled_tasks>
-	<task class="\APP\plugins\generic\crossrefReferenceLinking\CrossrefReferenceLinkingInfoSender">
+	<task class="APP\plugins\generic\crossrefReferenceLinking\CrossrefReferenceLinkingInfoSender">
 		<descr>Check if Crossref has found DOIs for your references.</descr>
 		<frequency minute="0"/>
 	</task>

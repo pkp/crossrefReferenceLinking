@@ -1,6 +1,6 @@
 =============================================================
 === CrossrefReferenceLinking plugin
-=== Version: 1.0.3
+=== Version: 2.0.0
 =============================================================
 
 
@@ -33,7 +33,7 @@ Version History
 1.0	- Initial Release
 1.0.1	- Adapt for OJS 3.2
 1.0.2	- Adapt for OJS 3.3
-1.0.3 - Adapt for OJS 3.4
+2.0.0 - Adapt for OJS 3.4
 
 Sponsors
 ---------------
