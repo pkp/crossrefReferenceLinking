@@ -23,54 +23,61 @@ use PKP\form\validation\FormValidatorPost;
 use PKP\linkAction\LinkAction;
 use PKP\linkAction\request\RedirectAction;
 
-
 class CrossrefReferenceLinkingSettingsForm extends Form
 {
-	public function __construct(public CrossrefReferenceLinkingPlugin $plugin, public int $contextId)
-	{
-		parent::__construct($plugin->getTemplateResource('settingsForm.tpl'));
-		$this->addCheck(new FormValidatorPost($this));
-		$this->addCheck(new FormValidatorCSRF($this));
-	}
+    public function __construct(public CrossrefReferenceLinkingPlugin $plugin, public int $contextId)
+    {
+        parent::__construct($plugin->getTemplateResource('settingsForm.tpl'));
+        $this->addCheck(new FormValidatorPost($this));
+        $this->addCheck(new FormValidatorCSRF($this));
+    }
 
-	/**
-	 * @copydoc Form::fetch()
-	 */
-	public function fetch($request, $template = NULL, $display = false): string
-	{
-		$dispatcher = $request->getDispatcher();
-		$templateMgr = TemplateManager::getManager($request);
-		$templateMgr->assign('pluginName', $this->plugin->getName());
-		if (!$this->plugin->hasCrossrefCredentials($this->contextId)) {
-			// Settings > Distribution > DOIs > Registration
-			$crossrefSettingsLinkAction = new LinkAction(
-					'settings',
-					new RedirectAction($dispatcher->url(
-							$request, Application::ROUTE_PAGE,
-							null, 'management', 'settings', 'distribution',
-							[],
-							'dois/doisRegistration' // Anchor for tab
-					)),
-					__('plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings'),
-					null
-					);
-			$templateMgr->assign('crossrefSettingsLinkAction', $crossrefSettingsLinkAction);
-		}
-		if (!$this->plugin->citationsEnabled($this->contextId)) {
-			// Settings > Workflow > Submission > Metadata
-			$submissionSettingsLinkAction = new LinkAction(
-				'settings',
-				new RedirectAction($dispatcher->url(
-					$request, Application::ROUTE_PAGE,
-					null, 'management', 'settings', 'workflow',
-					[],
-					'submission/metadata' // Anchor for tab
-				)),
-				__('plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings'),
-				null
-			);
-			$templateMgr->assign('submissionSettingsLinkAction', $submissionSettingsLinkAction);
-		}
-		return parent::fetch($request);
-	}
+    /**
+     * @copydoc Form::fetch()
+     */
+    public function fetch($request, $template = null, $display = false): string
+    {
+        $dispatcher = $request->getDispatcher();
+        $templateMgr = TemplateManager::getManager($request);
+        $templateMgr->assign('pluginName', $this->plugin->getName());
+        if (!$this->plugin->hasCrossrefCredentials($this->contextId)) {
+            // Settings > Distribution > DOIs > Registration
+            $crossrefSettingsLinkAction = new LinkAction(
+                'settings',
+                new RedirectAction($dispatcher->url(
+                    $request,
+                    Application::ROUTE_PAGE,
+                    null,
+                    'management',
+                    'settings',
+                    'distribution',
+                    [],
+                    'dois/doisRegistration' // Anchor for tab
+                )),
+                __('plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings'),
+                null
+            );
+            $templateMgr->assign('crossrefSettingsLinkAction', $crossrefSettingsLinkAction);
+        }
+        if (!$this->plugin->citationsEnabled($this->contextId)) {
+            // Settings > Workflow > Submission > Metadata
+            $submissionSettingsLinkAction = new LinkAction(
+                'settings',
+                new RedirectAction($dispatcher->url(
+                    $request,
+                    Application::ROUTE_PAGE,
+                    null,
+                    'management',
+                    'settings',
+                    'workflow',
+                    [],
+                    'submission/metadata' // Anchor for tab
+                )),
+                __('plugins.generic.crossrefReferenceLinking.settings.form.submissionSettings'),
+                null
+            );
+            $templateMgr->assign('submissionSettingsLinkAction', $submissionSettingsLinkAction);
+        }
+        return parent::fetch($request);
+    }
 }
