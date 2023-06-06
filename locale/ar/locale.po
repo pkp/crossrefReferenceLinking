@@ -28,6 +28,7 @@ msgstr "إذا غيرت مراجع المقالة بعد تسجيل معرفات
 msgid "plugins.generic.crossrefReferenceLinking.description.requirements"
 msgstr "هذه الإضافة تتطلب تتطلب أن تكون المقالة قد حصلت على معرف DOI لـ Crossref وأن هذا المعرف لا بد أن يكون مودعاً مع Crossref من داخل نظام المجلات المفتوحة. مراجع المقالة يمكن الحصول عليها من باب البيانات الوصفية ضمن مخطط سير العمل لطلب التقديم."
 
+#, fuzzy
 msgid "plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings"
 msgstr "إعدادات إضافة التصدير Crossref بصيغة XML"
 

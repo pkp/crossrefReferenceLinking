@@ -26,6 +26,7 @@ msgstr "Se si cambiano i riferimenti di un articolo dopo aver registrato il DOI,
 msgid "plugins.generic.crossrefReferenceLinking.description.requirements"
 msgstr "Questo plugin richiede che ad un articolo sia assegnato un DOI Crossref e che questo DOI sia depositato presso Crossref dall'interno di OJS. I riferimenti dell'articolo possono essere forniti nella sezione Riferimenti bibliografici nella scheda Pubblicazione di ogni sottomissione."
 
+#, fuzzy
 msgid "plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings"
 msgstr "Impostazioni del plugin di esportazione XML di Crossref"
 

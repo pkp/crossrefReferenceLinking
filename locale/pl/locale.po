@@ -30,6 +30,7 @@ msgstr ""
 "Ta wtyczka wymaga przypisania artykułu w Crossref DOI. DOI musi zostać założony w Crossref z poziomu OJS. Bibliografię do artykułów można podać w sekcji Metadane kazdego artykułu.\n"
 ""
 
+#, fuzzy
 msgid "plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings"
 msgstr "Wtyczka exportu do Crossref- Ustawienia"
 

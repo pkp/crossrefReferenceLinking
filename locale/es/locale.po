@@ -28,6 +28,7 @@ msgstr "Si cambia las referencias de un artículo después de registrar el DOI, 
 msgid "plugins.generic.crossrefReferenceLinking.description.requirements"
 msgstr "Este módulo requiere que se asigne un artículo a un DOI Crossref y éste debe depositarse en Crossref desde OJS. Se pueden proporcionar las referencias del artículo en la sección Metadatos en el flujo de trabajo de los envíos."
 
+#, fuzzy
 msgid "plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings"
 msgstr "Configuración del módulo de exportación XML Crossref"
 

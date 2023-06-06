@@ -27,7 +27,7 @@ msgid "plugins.generic.crossrefReferenceLinking.description.requirements"
 msgstr "This plugin requires an article to be assigned a Crossref DOI and this DOI must be deposited with Crossref from within OJS. Article references can be provided in the References section in the Publication tab of each submission."
 
 msgid "plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings"
-msgstr "Crossref XML Export Plugin Settings"
+msgstr "Crossref Settings"
 
 msgid "plugins.generic.crossrefReferenceLinking.settings.form.crossrefSettings.required"
 msgstr "Crossref username and password must be configured:"

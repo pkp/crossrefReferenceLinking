@@ -3,97 +3,101 @@
 /**
  * @file tools/checkCrossrefReferencesDOIs.php
  *
- * Copyright (c) 2014-2021 Simon Fraser University
- * Copyright (c) 2003-2021 John Willinsky
+ * Copyright (c) 2014-2023 Simon Fraser University
+ * Copyright (c) 2003-2023 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file LICENSE.
  *
  * @class CrossrefReferencesDOIsTool
- * @ingroup plugins_generic_crossrefReferenceLinking
- *
  * @brief CLI tool to check found Crossref citations DOIs
  */
 
-require(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/tools/bootstrap.inc.php');
+require(dirname(__FILE__, 5) . '/tools/bootstrap.php');
 
-class CrossrefReferencesDOIsTool extends CommandLineTool {
+use APP\core\Application;
+use APP\facades\Repo;
+use PKP\plugins\PluginRegistry;
 
-	/**
-	 * Constructor.
-	 * @param $argv array command-line arguments
-	 */
-	function __construct($argv = array()) {
-		parent::__construct($argv);
+class CrossrefReferencesDOIsTool extends \PKP\cliTool\CommandLineTool
+{
+    public array $parameters;
 
-		if (!sizeof($this->argv)) {
-			$this->usage();
-			exit(1);
-		}
+    /**
+     * Constructor.
+     * @param $argv array command-line arguments
+     */
+    public function __construct($argv = [])
+    {
+        parent::__construct($argv);
+        if (!sizeof($this->argv)) {
+            $this->usage();
+            exit(1);
+        }
+        $this->parameters = $this->argv;
+    }
 
-		$this->parameters = $this->argv;
-	}
+    /**
+     * Print command usage information.
+     */
+    public function usage(): void
+    {
+        echo _('plugins.generic.crossrefReferenceLinking.citationsFormActionName') . "\n"
+            . "Usage:\n"
+            . "{$this->scriptName} all\n"
+            . "{$this->scriptName} context context_id [...]\n"
+            . "{$this->scriptName} submission submission_id [...]\n";
+    }
 
-	/**
-	 * Print command usage information.
-	 */
-	function usage() {
-		echo _('plugins.generic.crossrefReferenceLinking.citationsFormActionName') . "\n"
-			. "Usage:\n"
-			. "{$this->scriptName} all\n"
-			. "{$this->scriptName} context context_id [...]\n"
-			. "{$this->scriptName} submission submission_id [...]\n";
-	}
+    /**
+     * Check citations DOIs
+     */
+    public function execute(): void
+    {
+        $contextDao = Application::getContextDAO();
 
-	/**
-	 * Check citations DOIs
-	 */
-	function execute() {
-		$submissionDao = DAORegistry::getDAO('SubmissionDAO');
-		$contextDao = Application::getContextDAO();
-
-		switch(array_shift($this->parameters)) {
-			case 'all':
-				$contexts = $contextDao->getAll();
-				while ($context = $contexts->next()) {
-					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $context->getId());
-					// Get published articles to check
-					$submissionsToCheck = $plugin->getSubmissionsToCheck($context);
-					foreach ($submissionsToCheck as $submissionToCheck) { /** @var $submissionToCheck Submission */
-						$plugin->getCrossrefReferencesDOIs($submissionToCheck->getCurrentPublication());
-					}
-				}
-				break;
-			case 'context':
-				foreach($this->parameters as $contextId) {
-					$context = $contextDao->getById($contextId);
-					if(!isset($context)) {
-						printf("Error: Skipping $contextId. Unknown context.\n");
-						continue;
-					}
-					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $context->getId());
-					// Get published articles to check
-					$submissionsToCheck = $plugin->getSubmissionsToCheck($context);
-					foreach ($submissionsToCheck as $submissionToCheck) { /** @var $submissionToCheck Submission */
-						$plugin->getCrossrefReferencesDOIs($submissionToCheck->getCurrentPublication());
-					}
-				}
-				break;
-			case 'submission':
-				foreach($this->parameters as $submissionId) {
-					$submission = $submissionDao->getById($submissionId);
-					if(!isset($submission)) {
-						printf("Error: Skipping $submissionId. Unknown submission.\n");
-						continue;
-					}
-					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $submission->getContextId());
-					$plugin->getCrossrefReferencesDOIs($submission->getCurrentPublication());
-				}
-				break;
-			default:
-				$this->usage();
-				break;
-		}
-	}
+        switch(array_shift($this->parameters)) {
+            case 'all':
+                $contexts = $contextDao->getAll();
+                while ($context = $contexts->next()) {
+                    $plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $context->getId()); /** @var CrossrefReferenceLinkingPlugin $plugin */
+                    // Get published articles to check
+                    $submissionsToCheck = $plugin->getSubmissionsToCheck($context);
+                    foreach ($submissionsToCheck as $submissionToCheck) { /** @var Submission $submissionToCheck */
+                        $plugin->considerFoundCrossrefReferencesDOIs($submissionToCheck->getCurrentPublication());
+                    }
+                }
+                break;
+            case 'context':
+                foreach ($this->parameters as $contextId) {
+                    $context = $contextDao->getById($contextId);
+                    if (!isset($context)) {
+                        printf("Error: Skipping $contextId. Unknown context.\n");
+                        continue;
+                    }
+                    $plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $context->getId()); /** @var CrossrefReferenceLinkingPlugin $plugin */
+                    // Get published articles to check
+                    $submissionsToCheck = $plugin->getSubmissionsToCheck($context);
+                    foreach ($submissionsToCheck as $submissionToCheck) { /** @var Submission $submissionToCheck */
+                        $plugin->considerFoundCrossrefReferencesDOIs($submissionToCheck->getCurrentPublication());
+                    }
+                }
+                break;
+            case 'submission':
+                foreach ($this->parameters as $submissionId) {
+                    $submission = Repo::submission()->get($submissionId);
+                    if (!isset($submission)) {
+                        printf("Error: Skipping $submissionId. Unknown submission.\n");
+                        continue;
+                    }
+                    $plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $submission->getData('contextId')); /** @var CrossrefReferenceLinkingPlugin $plugin */
+                    $plugin->considerFoundCrossrefReferencesDOIs($submission->getCurrentPublication());
+                }
+                break;
+            default:
+                $this->usage();
+                break;
+        }
+    }
 }
 
-$tool = new CrossrefReferencesDOIsTool(isset($argv) ? $argv : array());
+$tool = new CrossrefReferencesDOIsTool(isset($argv) ? $argv : []);
 $tool->execute();
