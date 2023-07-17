@@ -77,7 +77,6 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
 
         // Article page hooks
         Hook::add('Templates::Article::Details::Reference', [$this, 'displayReferenceDOI']);
-        Hook::add('Templates::Controllers::Tab::PublicationEntry::Form::CitationsForm::Citation', [$this, 'displayReferenceDOI']);
 
         return true;
     }
@@ -409,9 +408,9 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
         /** @var Citation $citation */
         $citation = $params[0]['citation'];
         /** @var \Smarty $smarty */
-        $smarty = $params[1];
+        $smarty = &$params[1];
         /** @var string $output */
-        $output = $params[2];
+        $output = &$params[2];
 
         if ($citation->getData($this->getCitationDoiSettingName())) {
             $crossrefFullUrl = 'https://doi.org/' . $citation->getData($this->getCitationDoiSettingName());
