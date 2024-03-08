@@ -54,6 +54,8 @@ class CrossrefReferencesDOIsTool extends CommandLineTool {
 			case 'all':
 				$contexts = $contextDao->getAll();
 				while ($context = $contexts->next()) {
+					// load pubIds for this journal
+					PluginRegistry::loadCategory('pubIds', true, $context->getId());
 					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $context->getId());
 					// Get published articles to check
 					$submissionsToCheck = $plugin->getSubmissionsToCheck($context);
@@ -69,6 +71,8 @@ class CrossrefReferencesDOIsTool extends CommandLineTool {
 						printf("Error: Skipping $contextId. Unknown context.\n");
 						continue;
 					}
+					// load pubIds for this journal
+					PluginRegistry::loadCategory('pubIds', true, $context->getId());
 					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $context->getId());
 					// Get published articles to check
 					$submissionsToCheck = $plugin->getSubmissionsToCheck($context);
@@ -84,6 +88,8 @@ class CrossrefReferencesDOIsTool extends CommandLineTool {
 						printf("Error: Skipping $submissionId. Unknown submission.\n");
 						continue;
 					}
+					// load pubIds for this journal
+					PluginRegistry::loadCategory('pubIds', true, $submission->getContextId());
 					$plugin = PluginRegistry::loadPlugin('generic', 'crossrefReferenceLinking', $submission->getContextId());
 					$plugin->getCrossrefReferencesDOIs($submission->getCurrentPublication());
 				}

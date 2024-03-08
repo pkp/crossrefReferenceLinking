@@ -54,6 +54,8 @@ class CrossrefReferenceLinkingInfoSender extends ScheduledTask {
 		$journals = $this->_getJournals();
 
 		foreach ($journals as $journal) {
+			// load pubIds for this journal
+			PluginRegistry::loadCategory('pubIds', true, $journal->getId());
 			// Call the plugin register function, in order to be able to save the new article and citation settings in the DB
 			$plugin->register('generic', $plugin->getPluginPath(), $journal->getId());
 			// Get published articles to check
