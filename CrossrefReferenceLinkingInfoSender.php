@@ -26,7 +26,7 @@ class CrossrefReferenceLinkingInfoSender extends ScheduledTask
      * Constructor.
      * @param $args array task arguments
      */
-    public function __construct($args)
+    public function __construct(array $args)
     {
         parent::__construct($args);
         $this->plugin = PluginRegistry::getPlugin('generic', 'crossrefreferencelinkingplugin');

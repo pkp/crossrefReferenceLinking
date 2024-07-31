@@ -29,8 +29,10 @@ use PKP\linkAction\request\AjaxModal;
 use PKP\plugins\GenericPlugin;
 use PKP\plugins\Hook;
 use PKP\plugins\PluginRegistry;
+use PKP\plugins\interfaces\HasTaskScheduler;
+use PKP\scheduledTask\PKPScheduler;
 
-class CrossrefReferenceLinkingPlugin extends GenericPlugin
+class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskScheduler
 {
     public const CROSSREF_API_REFS_URL = 'https://doi.crossref.org/getResolvedRefs';
 
@@ -64,9 +66,6 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
         if (!$this->hasCrossrefCredentials($mainContextId) || !$this->citationsEnabled($mainContextId)) {
             return true;
         }
-
-        // Register scheduled task
-        Hook::add('AcronPlugin::parseCronTab', [$this, 'callbackParseCronTab']);
 
         // Crossref export plugin hooks
         Hook::add('articlecrossrefxmlfilter::execute', [$this, 'addCrossrefCitationsElements']);
@@ -177,21 +176,15 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
     }
 
     /**
-     * @see AcronPlugin::_parseCrontab()
-     *
-     * @param $hookName string 'AcronPlugin::parseCronTab'
-     * @param $args array [
-     *  @option array Task files paths
-     * ]
+     * @copydoc \PKP\plugins\interfaces\HasTaskScheduler::registerSchedules()
      */
-    public function callbackParseCronTab(string $hookName, array $args): bool
+    public function registerSchedules(PKPScheduler $scheduler): void
     {
-        if ($this->getEnabled() || !Application::isUnderMaintenance()) {
-            /** @var array $taskFilesPath */
-            $taskFilesPath =& $args[0]; // Reference needed.
-            $taskFilesPath[] = $this->getPluginPath() . '/scheduledTasks.xml';
-        }
-        return Hook::CONTINUE;
+        $scheduler
+            ->addSchedule(new CrossrefReferenceLinkingInfoSender([]))
+            ->hourly()
+            ->name(CrossrefReferenceLinkingInfoSender::class)
+            ->withoutOverlapping();
     }
 
     /**
