@@ -50,7 +50,7 @@ class CrossrefReferenceLinkingSettingsForm extends Form
                     null,
                     'management',
                     'settings',
-                    'distribution',
+                    ['distribution'],
                     [],
                     'dois/doisRegistration' // Anchor for tab
                 )),
