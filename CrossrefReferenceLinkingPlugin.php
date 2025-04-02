@@ -3,8 +3,8 @@
 /**
  * @file CrossrefReferenceLinkingPlugin.inc.php
  *
- * Copyright (c) 2013-2023 Simon Fraser University
- * Copyright (c) 2003-2023 John Willinsky
+ * Copyright (c) 2013-2025 Simon Fraser University
+ * Copyright (c) 2003-2025 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file LICENSE.
  *
  * @class CrossrefReferenceLinkingPlugin
@@ -20,10 +20,11 @@ use APP\notification\Notification;
 use APP\publication\Publication;
 use APP\submission\Submission;
 use DOMDocument;
-use PKP\citation\CitationDAO;
+use GuzzleHttp\Exception\RequestException;
+use PKP\citation\Citation;
 use PKP\context\Context;
 use PKP\core\JSONMessage;
-use PKP\db\DAORegistry;
+use PKP\doi\Doi;
 use PKP\linkAction\LinkAction;
 use PKP\linkAction\request\AjaxModal;
 use PKP\plugins\GenericPlugin;
@@ -31,6 +32,7 @@ use PKP\plugins\Hook;
 use PKP\plugins\PluginRegistry;
 use PKP\plugins\interfaces\HasTaskScheduler;
 use PKP\scheduledTask\PKPScheduler;
+use Smarty;
 
 class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskScheduler
 {
@@ -54,7 +56,6 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
 
         // Additional fields added
         Hook::add('Schema::get::submission', [$this, 'addSubmissionSchema']);
-        Hook::add('citationdao::getAdditionalFieldNames', [$this, 'getAdditionalCitationFieldNames']);
 
         if (!$this->getEnabled($mainContextId)) {
             return true;
@@ -72,7 +73,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
         Hook::add('crossrefexportplugin::deposited', [$this, 'getCitationsDiagnosticId']);
 
         // Citation changed hook
-        Hook::add('CitationDAO::afterImportCitations', [$this, 'citationsChanged']);
+        Hook::add('Citation::importCitations::after', [$this, 'citationsChanged']);
 
         // Article page hooks
         Hook::add('Templates::Article::Details::Reference', [$this, 'displayReferenceDOI']);
@@ -203,7 +204,6 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
         $context = $request->getContext();
         // Crossref export cannot be executed via CLI any more, thus there will always be a context
         $contextId = $context->getId();
-        $citationDao = DAORegistry::getDAO('CitationDAO'); /** @var CitationDAO $citationDao */
 
         $rfNamespace = 'http://www.crossref.org/schema/5.3.1';
         $articleNodes = $preliminaryOutput->getElementsByTagName('journal_article');
@@ -222,17 +222,16 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
                 return false;
             }
             $submission = Repo::submission()->get($publications->first()->getData('submissionId'));
-            $articleCitations = $citationDao->getByPublicationId($submission->getCurrentPublication()->getId());
-            $articleCitationsArray = $articleCitations->toArray();
-            if (!empty($articleCitationsArray)) {
+            $citations = Repo::citation()->getByPublicationId($submission->getCurrentPublication()->getId());
+            if (!empty($citations)) {
                 $citationListNode = $preliminaryOutput->createElementNS($rfNamespace, 'citation_list');
-                foreach ($articleCitationsArray as $citation) {
+                foreach ($citations as $citation) {
                     $rawCitation = $citation->getRawCitation();
                     if (!empty($rawCitation)) {
                         $citationNode = $preliminaryOutput->createElementNS($rfNamespace, 'citation');
                         $citationNode->setAttribute('key', $citation->getId());
                         // if Crossref DOI already exists for this citation, include it
-                        // else include unstructred raw citation
+                        // else include unstructured raw citation
                         if ($citation->getData($this->getCitationDoiSettingName())) {
                             $node = $preliminaryOutput->createElementNS($rfNamespace, 'doi');
                             $node->appendChild($preliminaryOutput->createTextNode($citation->getData($this->getCitationDoiSettingName())));
@@ -256,7 +255,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
      * @param $hookName string Hook name 'crossrefexportplugin::deposited'
      * @param array [
      *  @option CrossrefExportPlugin
-     *  @option string XML reposonse from Crossref deposit
+     *  @option string XML response from Crossref deposit
      *  @option Submission
      * ]
      */
@@ -275,7 +274,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
             //set the citations diagnostic code and the setting for the automatic check
             $submission->setData($this->getCitationsDiagnosticIdSettingName(), $citationsDiagnosticCode);
             $submission->setData($this->getAutoCheckSettingName(), true);
-            $submission = Repo::submission()->edit($submission, [], Application::get()->getRequest());
+            Repo::submission()->edit($submission, []);
         }
         return Hook::CONTINUE;
     }
@@ -307,19 +306,10 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
     }
 
     /**
-     * Consider the additional citation setting name 'crossref::doi'.
-     */
-    public function getAdditionalCitationFieldNames(string $hookName, CitationDAO $citationDao, array &$additionalFields): bool
-    {
-        $additionalFields[] = $this->getCitationDoiSettingName();
-        return Hook::CONTINUE;
-    }
-
-    /**
      * Resets the submission data related to Reference Linking Plugin.
      * Used every time the citations for a certain publication are imported.
      *
-     * @param $hookName string 'CitationDAO::afterImportCitations'
+     * @param $hookName string 'Citation::importCitations::after'
      * @param $params array [
      *  @option integer The publication ID for which the citations are imported
      * ]
@@ -335,7 +325,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
         if ($submission->getData($this->getCitationsDiagnosticIdSettingName())) {
             $submission->setData($this->getCitationsDiagnosticIdSettingName(), null);
             $submission->setData($this->getAutoCheckSettingName(), null);
-            $submission = Repo::submission()->edit($submission, [], Application::get()->getRequest());
+            Repo::submission()->edit($submission, []);
         }
         return Hook::CONTINUE;
     }
@@ -350,11 +340,10 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
             return;
         }
 
-        $citationDao = DAORegistry::getDAO('CitationDAO'); /** @var CitationDAO $citationDao */
-        $citations = $citationDao->getByPublicationId($publication->getId())->toAssociativeArray();
+        $citations = Repo::citation()->getByPublicationId($publication->getId());
 
         $citationsToCheck = [];
-        foreach ($citations as $citation) { /** @var Citation $citation */
+        foreach ($citations as $citation) {
             if (!$citation->getData($this->getCitationDoiSettingName())) {
                 $citationsToCheck[$citation->getId()] = $citation;
             }
@@ -377,12 +366,12 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
             foreach ($filteredMatchedReferences as $matchedReference) {
                 $citation = $citationsToCheck[$matchedReference['key']];
                 $citation->setData($this->getCitationDoiSettingName(), $matchedReference['doi']);
-                $citationDao->updateObject($citation);
+                Repo::citation()->edit($citation, []);
             }
 
             // remove auto check setting
             $submission->setData($this->getAutoCheckSettingName(), null);
-            $submission = Repo::submission()->edit($submission, [], Application::get()->getRequest());
+            Repo::submission()->edit($submission, []);
         }
     }
 
@@ -426,7 +415,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
      */
     public function getCitationDoiSettingName(): string
     {
-        return 'crossref::doi';
+        return 'doi';
     }
 
     /**
@@ -478,7 +467,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
         $httpClient = Application::get()->getHttpClient();
         try {
             $response = $httpClient->request('POST', $url);
-        } catch (\GuzzleHttp\Exception\RequestException $e) {
+        } catch (RequestException $e) {
             return null;
         }
 
