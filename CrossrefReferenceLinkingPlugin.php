@@ -87,7 +87,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
     {
         // If crossref plugin is set i.e. the crossref credentials exist we can assume that DOI plugin is set correctly
         $crossrefPlugin = PluginRegistry::getPlugin('generic', 'crossrefplugin');
-        return $crossrefPlugin && strlen($crossrefPlugin->getSetting($contextId, 'username')) > 0 && strlen($crossrefPlugin->getSetting($contextId, 'password')) > 0;
+        return $crossrefPlugin && strlen((string) $crossrefPlugin->getSetting($contextId, 'username')) > 0 && strlen((string) $crossrefPlugin->getSetting($contextId, 'password')) > 0;
     }
 
     /**
