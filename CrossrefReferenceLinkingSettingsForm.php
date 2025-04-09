@@ -69,7 +69,7 @@ class CrossrefReferenceLinkingSettingsForm extends Form
                     null,
                     'management',
                     'settings',
-                    'workflow',
+                    ['workflow'],
                     [],
                     'submission/metadata' // Anchor for tab
                 )),
