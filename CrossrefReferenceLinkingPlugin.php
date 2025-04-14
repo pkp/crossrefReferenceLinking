@@ -203,7 +203,6 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
         $context = $request->getContext();
         // Crossref export cannot be executed via CLI any more, thus there will always be a context
         $contextId = $context->getId();
-        $citationDao = DAORegistry::getDAO('CitationDAO'); /** @var CitationDAO $citationDao */
 
         $rfNamespace = 'http://www.crossref.org/schema/5.3.1';
         $articleNodes = $preliminaryOutput->getElementsByTagName('journal_article');
@@ -222,11 +221,10 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
                 return false;
             }
             $submission = Repo::submission()->get($publications->first()->getData('submissionId'));
-            $articleCitations = $citationDao->getByPublicationId($submission->getCurrentPublication()->getId());
-            $articleCitationsArray = $articleCitations->toArray();
-            if (!empty($articleCitationsArray)) {
+            $articleCitations = $submission->getCurrentPublication()->getData('citations');
+            if (!empty($articleCitations)) {
                 $citationListNode = $preliminaryOutput->createElementNS($rfNamespace, 'citation_list');
-                foreach ($articleCitationsArray as $citation) {
+                foreach ($articleCitations as $citation) {
                     $rawCitation = $citation->getRawCitation();
                     if (!empty($rawCitation)) {
                         $citationNode = $preliminaryOutput->createElementNS($rfNamespace, 'citation');
@@ -351,7 +349,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
         }
 
         $citationDao = DAORegistry::getDAO('CitationDAO'); /** @var CitationDAO $citationDao */
-        $citations = $citationDao->getByPublicationId($publication->getId())->toAssociativeArray();
+        $citations = $publication->getData('citations') ?? [];
 
         $citationsToCheck = [];
         foreach ($citations as $citation) { /** @var Citation $citation */
