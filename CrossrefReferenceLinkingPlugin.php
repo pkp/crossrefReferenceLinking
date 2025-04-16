@@ -3,8 +3,8 @@
 /**
  * @file CrossrefReferenceLinkingPlugin.inc.php
  *
- * Copyright (c) 2013-2023 Simon Fraser University
- * Copyright (c) 2003-2023 John Willinsky
+ * Copyright (c) 2013-2025 Simon Fraser University
+ * Copyright (c) 2003-2025 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file LICENSE.
  *
  * @class CrossrefReferenceLinkingPlugin
@@ -19,6 +19,8 @@ use APP\notification\NotificationManager;
 use APP\notification\Notification;
 use APP\publication\Publication;
 use APP\submission\Submission;
+use Citation;
+use Doi;
 use DOMDocument;
 use PKP\citation\CitationDAO;
 use PKP\context\Context;
@@ -72,7 +74,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
         Hook::add('crossrefexportplugin::deposited', [$this, 'getCitationsDiagnosticId']);
 
         // Citation changed hook
-        Hook::add('CitationDAO::afterImportCitations', [$this, 'citationsChanged']);
+        Hook::add('Citation::importCitations::after', [$this, 'citationsChanged']);
 
         // Article page hooks
         Hook::add('Templates::Article::Details::Reference', [$this, 'displayReferenceDOI']);
@@ -204,7 +206,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
         // Crossref export cannot be executed via CLI any more, thus there will always be a context
         $contextId = $context->getId();
 
-        $rfNamespace = 'http://www.crossref.org/schema/5.3.1';
+        $rfNamespace = 'http://www.crossref.org/schema/5.4.0';
         $articleNodes = $preliminaryOutput->getElementsByTagName('journal_article');
         foreach ($articleNodes as $articleNode) {
             $doiDataNode = $articleNode->getElementsByTagName('doi_data')->item(0);
@@ -230,7 +232,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
                         $citationNode = $preliminaryOutput->createElementNS($rfNamespace, 'citation');
                         $citationNode->setAttribute('key', $citation->getId());
                         // if Crossref DOI already exists for this citation, include it
-                        // else include unstructred raw citation
+                        // else include unstructured raw citation
                         if ($citation->getData($this->getCitationDoiSettingName())) {
                             $node = $preliminaryOutput->createElementNS($rfNamespace, 'doi');
                             $node->appendChild($preliminaryOutput->createTextNode($citation->getData($this->getCitationDoiSettingName())));
@@ -252,9 +254,9 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
      * During the article DOI registration with Crossref, get the citations diagnostic ID from the Crossref response.
      *
      * @param $hookName string Hook name 'crossrefexportplugin::deposited'
-     * @param array [
+     * @param $params array [
      *  @option CrossrefExportPlugin
-     *  @option string XML reposonse from Crossref deposit
+     *  @option string XML response from Crossref deposit
      *  @option Submission
      * ]
      */
