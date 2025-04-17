@@ -15,6 +15,9 @@ namespace APP\plugins\generic\crossrefReferenceLinking;
 
 use APP\core\Application;
 use APP\journal\Journal;
+use APP\journal\JournalDAO;
+use APP\submission\Submission;
+use PKP\db\DAOResultFactory;
 use PKP\plugins\PluginRegistry;
 use PKP\scheduledTask\ScheduledTask;
 
@@ -52,7 +55,7 @@ class CrossrefReferenceLinkingInfoSender extends ScheduledTask
         foreach ($this->getJournals() as $journal) {
             // Get published articles to check
             $submissionsToCheck = $this->plugin->getSubmissionsToCheck($journal);
-            foreach ($submissionsToCheck as $submissionToCheck) { /** @var Article $submissionToCheck */
+            foreach ($submissionsToCheck as $submissionToCheck) { /** @var Submission $submissionToCheck */
                 $this->plugin->considerFoundCrossrefReferencesDOIs($submissionToCheck->getCurrentPublication());
             }
         }
@@ -71,8 +74,10 @@ class CrossrefReferenceLinkingInfoSender extends ScheduledTask
         $contextFactory = $contextDao->getAll(true); /** @var DAOResultFactory $contextFactory */
         $journals = [];
         foreach ($contextFactory->toIterator() as $journal) { /** @var Journal $journal */
-            if ($this->plugin->citationsEnabled($journal->getId()) &&
-                $this->plugin->hasCrossrefCredentials($journal->getId())) {
+            if (
+                $this->plugin->citationsEnabled($journal->getId()) &&
+                $this->plugin->hasCrossrefCredentials($journal->getId())
+            ) {
                 $journals[] = $journal;
             }
         }

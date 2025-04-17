@@ -99,5 +99,5 @@ class CrossrefReferencesDOIsTool extends \PKP\cliTool\CommandLineTool
     }
 }
 
-$tool = new CrossrefReferencesDOIsTool(isset($argv) ? $argv : []);
+$tool = new CrossrefReferencesDOIsTool($argv ?? []);
 $tool->execute();
