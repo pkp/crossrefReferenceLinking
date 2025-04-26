@@ -421,11 +421,34 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 		$smarty =& $params[1];
 		$output =& $params[2];
 
-		if ($citation->getData($this->getCitationDoiSettingName())) {
-			$crossrefFullUrl = 'https://doi.org/' . $citation->getData($this->getCitationDoiSettingName());
-			$smarty->assign('crossrefFullUrl', $crossrefFullUrl);
+        $doi = $citation->getData($this->getCitationDoiSettingName());
+
+        if ($doi) {
+            $doiUrl = 'https://doi.org/' . $doi;
+            $rawCitation = $citation->getRawCitation();
+
+            // If the raw citation already contains a DOI URL, remove it
+            if (strpos($rawCitation, $doiUrl) !== false) {
+                // Remove exactly matching linked DOI or plain text DOI URL
+                $rawCitation = preg_replace(
+                    '#<a[^>]+href=["\']' . preg_quote($doiUrl, '#') . '["\'][^>]*>[^<]*</a>#i',
+                    '',
+                    $rawCitation);
+
+                $rawCitation = str_replace($doiUrl, '', $rawCitation);
+
+                // Cleanup multiple spaces created by removal and set the cleaned citation
+                $rawCitation = preg_replace('/\s+/', ' ', $rawCitation);
+                $rawCitation = trim($rawCitation);
+
+                $output = $rawCitation;
+            }
+
+            $crossrefFullUrl = $doiUrl;
+            $smarty->assign('crossrefFullUrl', $crossrefFullUrl);
 			$output .= $smarty->fetch($this->getTemplateResource('displayDOI.tpl'));
-		}
+        }
+
 		return false;
 	}
 
@@ -509,4 +532,3 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
 		return $matchedReferences;
 	}
 }
-
