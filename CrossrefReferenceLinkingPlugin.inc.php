@@ -424,11 +424,14 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
         $doi = $citation->getData($this->getCitationDoiSettingName());
 
         if ($doi) {
-            $doiUrl = 'https://doi.org/' . $doi;
             $rawCitation = $citation->getRawCitation();
+            $doiUrl = 'https://doi.org/' . $doi;
+
+            // Normalize to lowercase for comparison
+            $rawCitationNormalized = strtolower($rawCitation);
 
             // If the raw citation already contains a DOI URL, remove it
-            if (strpos($rawCitation, $doiUrl) !== false) {
+            if (strpos($rawCitationNormalized, strtolower($doiUrl)) !== false) {
                 // Remove exactly matching linked DOI or plain text DOI URL
                 $rawCitation = preg_replace(
                     '#<a[^>]+href=["\']' . preg_quote($doiUrl, '#') . '["\'][^>]*>[^<]*</a>#i',
