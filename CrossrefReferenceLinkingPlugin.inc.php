@@ -426,19 +426,27 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin {
         if ($doi) {
             $rawCitation = $citation->getRawCitation();
             $doiUrl = 'https://doi.org/' . $doi;
+            $doiIdentifier = $doi;
 
             // Normalize to lowercase for comparison
             $rawCitationNormalized = strtolower($rawCitation);
 
             // If the raw citation already contains a DOI URL, remove it
             if (strpos($rawCitationNormalized, strtolower($doiUrl)) !== false) {
-                // Remove exactly matching linked DOI or plain text DOI URL
+                // Remove exactly matching linked DOI
                 $rawCitation = preg_replace(
                     '#<a[^>]+href=["\']' . preg_quote($doiUrl, '#') . '["\'][^>]*>[^<]*</a>#i',
                     '',
                     $rawCitation);
 
-                $rawCitation = str_replace($doiUrl, '', $rawCitation);
+                // Remove DOI in various text forms
+                $patterns = [
+                    '/doi:\s*https:\/\/doi\.org\/' . preg_quote($doiIdentifier, '/') . '/i',
+                    '/doi:\s*' . preg_quote($doiIdentifier, '/') . '/i',
+                    '/https:\/\/doi\.org\/' . preg_quote($doiIdentifier, '/') . '/i',
+                    '/' . preg_quote($doiIdentifier, '/') . '/i'
+                ];
+                $rawCitation = preg_replace($patterns, '', $rawCitation);
 
                 // Cleanup multiple spaces created by removal and set the cleaned citation
                 $rawCitation = preg_replace('/\s+/', ' ', $rawCitation);
