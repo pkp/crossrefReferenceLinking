@@ -275,7 +275,8 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
             //set the citations diagnostic code and the setting for the automatic check
             $submission->setData($this->getCitationsDiagnosticIdSettingName(), $citationsDiagnosticCode);
             $submission->setData($this->getAutoCheckSettingName(), true);
-            $submission = Repo::submission()->edit($submission, [], Application::get()->getRequest());
+            Repo::submission()->edit($submission, []);
+            $submission = Repo::submission()->get($submission->getId());
         }
         return Hook::CONTINUE;
     }
@@ -319,23 +320,17 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
      * Resets the submission data related to Reference Linking Plugin.
      * Used every time the citations for a certain publication are imported.
      *
-     * @param $hookName string 'CitationDAO::afterImportCitations'
-     * @param $params array [
-     *  @option integer The publication ID for which the citations are imported
-     * ]
+     * @param $hookName string 'Citation::importCitations::after'
      */
-    public function citationsChanged(string $hookName, array $params): bool
+    public function citationsChanged(string $hookName, int $publicationId, array $existingCitations, array $importedCitations): bool
     {
-        /** @var int $publicationId */
-        $publicationId = $params[0];
-
         $publication = Repo::publication()->get($publicationId);
         $submission = Repo::submission()->get($publication->getData('submissionId'));
 
         if ($submission->getData($this->getCitationsDiagnosticIdSettingName())) {
             $submission->setData($this->getCitationsDiagnosticIdSettingName(), null);
             $submission->setData($this->getAutoCheckSettingName(), null);
-            $submission = Repo::submission()->edit($submission, [], Application::get()->getRequest());
+            Repo::submission()->edit($submission, []);
         }
         return Hook::CONTINUE;
     }
@@ -382,7 +377,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
 
             // remove auto check setting
             $submission->setData($this->getAutoCheckSettingName(), null);
-            $submission = Repo::submission()->edit($submission, [], Application::get()->getRequest());
+            Repo::submission()->edit($submission, []);
         }
     }
 
@@ -445,7 +440,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
      */
     public function getSubmissionsToCheck(Context $context): array
     {
-        // Retrieve all published articles with their DOIs depositted together with the references.
+        // Retrieve all published articles with their DOIs deposited together with the references.
         // i.e. with the citations diagnostic ID setting
         $submissionIds = Repo::submission()->getIdsBySetting($this->getAutoCheckSettingName(), true, $context->getId())->toArray();
         $submissions = array_map(function ($submissionId) {
@@ -458,7 +453,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
     }
 
     /**
-     * Use Crossref API to get the references DOIs for the the given article DOI.
+     * Use Crossref API to get the references DOIs for the given article DOI.
      */
     protected function getResolvedRefs(string $doi, int $contextId): ?array
     {
