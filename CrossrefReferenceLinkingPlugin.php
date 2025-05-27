@@ -22,10 +22,8 @@ use APP\submission\Submission;
 use Citation;
 use Doi;
 use DOMDocument;
-use PKP\citation\CitationDAO;
 use PKP\context\Context;
 use PKP\core\JSONMessage;
-use PKP\db\DAORegistry;
 use PKP\linkAction\LinkAction;
 use PKP\linkAction\request\AjaxModal;
 use PKP\plugins\GenericPlugin;
@@ -56,7 +54,6 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
 
         // Additional fields added
         Hook::add('Schema::get::submission', [$this, 'addSubmissionSchema']);
-        Hook::add('citationdao::getAdditionalFieldNames', [$this, 'getAdditionalCitationFieldNames']);
 
         if (!$this->getEnabled($mainContextId)) {
             return true;
@@ -345,11 +342,10 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
             return;
         }
 
-        $citationDao = DAORegistry::getDAO('CitationDAO'); /** @var CitationDAO $citationDao */
-        $citations = $publication->getData('citations') ?? [];
+        $citations = Repo::citation()->getByPublicationId($publication->getId());
 
         $citationsToCheck = [];
-        foreach ($citations as $citation) { /** @var Citation $citation */
+        foreach ($citations as $citation) {
             if (!$citation->getData($this->getCitationDoiSettingName())) {
                 $citationsToCheck[$citation->getId()] = $citation;
             }
@@ -372,7 +368,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
             foreach ($filteredMatchedReferences as $matchedReference) {
                 $citation = $citationsToCheck[$matchedReference['key']];
                 $citation->setData($this->getCitationDoiSettingName(), $matchedReference['doi']);
-                $citationDao->updateObject($citation);
+                Repo::citation()->edit($citation, []);
             }
 
             // remove auto check setting
