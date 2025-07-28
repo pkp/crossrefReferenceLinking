@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @file CrossrefReferenceLinkingPlugin.inc.php
+ * @file CrossrefReferenceLinkingPlugin.php
  *
  * Copyright (c) 2013-2025 Simon Fraser University
  * Copyright (c) 2003-2025 John Willinsky
@@ -85,7 +85,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
     /**
      * Are Crossref username and password set in Crossref plugin
      */
-    public function hasCrossrefCredentials(int $contextId): bool
+    public function hasCrossrefCredentials(?int $contextId): bool
     {
         // If crossref plugin is set i.e. the crossref credentials exist we can assume that DOI plugin is set correctly
         $crossrefPlugin = PluginRegistry::getPlugin('generic', 'crossrefplugin');
@@ -95,7 +95,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
     /**
      * Are citations submission metadata enabled in this journal
      */
-    public function citationsEnabled(int $contextId): bool
+    public function citationsEnabled(?int $contextId): bool
     {
         $contextDao = Application::getContextDAO();
         $context = $contextDao->getById($contextId);
