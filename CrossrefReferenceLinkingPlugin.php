@@ -3,8 +3,8 @@
 /**
  * @file CrossrefReferenceLinkingPlugin.inc.php
  *
- * Copyright (c) 2013-2023 Simon Fraser University
- * Copyright (c) 2003-2023 John Willinsky
+ * Copyright (c) 2013-2025 Simon Fraser University
+ * Copyright (c) 2003-2025 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file LICENSE.
  *
  * @class CrossrefReferenceLinkingPlugin
@@ -54,17 +54,6 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
         Hook::add('Schema::get::submission', [$this, 'addSubmissionSchema']);
         Hook::add('citationdao::getAdditionalFieldNames', [$this, 'getAdditionalCitationFieldNames']);
 
-        if (!$this->getEnabled($mainContextId)) {
-            return true;
-        }
-
-        if (!isset($mainContextId)) {
-            $mainContextId = $this->getCurrentContextId();
-        }
-        if (!$this->hasCrossrefCredentials($mainContextId) || !$this->citationsEnabled($mainContextId)) {
-            return true;
-        }
-
         // Register scheduled task
         Hook::add('AcronPlugin::parseCronTab', [$this, 'callbackParseCronTab']);
 
@@ -79,26 +68,6 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
         Hook::add('Templates::Article::Details::Reference', [$this, 'displayReferenceDOI']);
 
         return true;
-    }
-
-    /**
-     * Are Crossref username and password set in Crossref plugin
-     */
-    public function hasCrossrefCredentials(int $contextId): bool
-    {
-        // If crossref plugin is set i.e. the crossref credentials exist we can assume that DOI plugin is set correctly
-        $crossrefPlugin = PluginRegistry::getPlugin('generic', 'crossrefplugin');
-        return $crossrefPlugin && strlen((string) $crossrefPlugin->getSetting($contextId, 'username')) > 0 && strlen((string) $crossrefPlugin->getSetting($contextId, 'password')) > 0;
-    }
-
-    /**
-     * Are citations submission metadata enabled in this journal
-     */
-    public function citationsEnabled(int $contextId): bool
-    {
-        $contextDao = Application::getContextDAO();
-        $context = $contextDao->getById($contextId);
-        return !empty($context->getSetting('citations'));
     }
 
     /**
@@ -177,6 +146,41 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
     }
 
     /**
+     * Add properties to the submission entity (SchemaDAO-based)
+     *
+     * @param $hookName string `Schema::get::submission`
+     * @param array $args [
+     *      @option stdClass $schema
+     * ]
+     */
+    public function addSubmissionSchema(string $hookName, array $args): bool
+    {
+        $schema = $args[0];
+
+        $schema->properties->{$this->getCitationsDiagnosticIdSettingName()} = (object) [
+            'type' => 'string',
+            'apiSummary' => true,
+            'validation' => ['nullable']
+        ];
+
+        $schema->properties->{$this->getAutoCheckSettingName()} = (object) [
+            'type' => 'boolean',
+            'apiSummary' => true,
+            'validation' => ['nullable']
+        ];
+        return Hook::CONTINUE;
+    }
+
+    /**
+     * Consider the additional citation setting name 'crossref::doi'.
+     */
+    public function getAdditionalCitationFieldNames(string $hookName, CitationDAO $citationDao, array &$additionalFields): bool
+    {
+        $additionalFields[] = $this->getCitationDoiSettingName();
+        return Hook::CONTINUE;
+    }
+
+    /**
      * @see AcronPlugin::_parseCrontab()
      *
      * @param $hookName string 'AcronPlugin::parseCronTab'
@@ -186,11 +190,15 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
      */
     public function callbackParseCronTab(string $hookName, array $args): bool
     {
-        if ($this->getEnabled() || !Application::isUnderMaintenance()) {
-            /** @var array $taskFilesPath */
-            $taskFilesPath =& $args[0]; // Reference needed.
-            $taskFilesPath[] = $this->getPluginPath() . '/scheduledTasks.xml';
+        if (!$this->getEnabled() ||
+            !$this->hasCrossrefCredentials() ||
+            !$this->citationsEnabled()) {
+
+                return Hook::CONTINUE;
         }
+        /** @var array $taskFilesPath */
+        $taskFilesPath =& $args[0]; // Reference needed.
+        $taskFilesPath[] = $this->getPluginPath() . '/scheduledTasks.xml';
         return Hook::CONTINUE;
     }
 
@@ -204,6 +212,13 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
      */
     public function addCrossrefCitationsElements(string $hookName, array $params): bool
     {
+        if (!$this->getEnabled() ||
+            !$this->hasCrossrefCredentials() ||
+            !$this->citationsEnabled()) {
+
+                return Hook::CONTINUE;
+        }
+
         /** @var DOMDocument $preliminaryOutput */
         $preliminaryOutput =& $params[0];
         $request = Application::get()->getRequest();
@@ -269,6 +284,13 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
      */
     public function getCitationsDiagnosticId(string $hookName, array $params): bool
     {
+        if (!$this->getEnabled() ||
+            !$this->hasCrossrefCredentials() ||
+            !$this->citationsEnabled()) {
+
+                return Hook::CONTINUE;
+        }
+
         /** @var string $response */
         $response = & $params[1];
         /** @var Submission $submission */
@@ -288,41 +310,6 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
     }
 
     /**
-     * Add properties to the submission entity (SchemaDAO-based)
-     *
-     * @param $hookName string `Schema::get::submission`
-     * @param array $args [
-     *      @option stdClass $schema
-     * ]
-     */
-    public function addSubmissionSchema(string $hookName, array $args): bool
-    {
-        $schema = $args[0];
-
-        $schema->properties->{$this->getCitationsDiagnosticIdSettingName()} = (object) [
-            'type' => 'string',
-            'apiSummary' => true,
-            'validation' => ['nullable']
-        ];
-
-        $schema->properties->{$this->getAutoCheckSettingName()} = (object) [
-            'type' => 'boolean',
-            'apiSummary' => true,
-            'validation' => ['nullable']
-        ];
-        return Hook::CONTINUE;
-    }
-
-    /**
-     * Consider the additional citation setting name 'crossref::doi'.
-     */
-    public function getAdditionalCitationFieldNames(string $hookName, CitationDAO $citationDao, array &$additionalFields): bool
-    {
-        $additionalFields[] = $this->getCitationDoiSettingName();
-        return Hook::CONTINUE;
-    }
-
-    /**
      * Resets the submission data related to Reference Linking Plugin.
      * Used every time the citations for a certain publication are imported.
      *
@@ -333,6 +320,13 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
      */
     public function citationsChanged(string $hookName, array $params): bool
     {
+        if (!$this->getEnabled() ||
+            !$this->hasCrossrefCredentials() ||
+            !$this->citationsEnabled()) {
+
+                return Hook::CONTINUE;
+        }
+
         /** @var int $publicationId */
         $publicationId = $params[0];
 
@@ -345,6 +339,110 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
             $submission = Repo::submission()->edit($submission, [], Application::get()->getRequest());
         }
         return Hook::CONTINUE;
+    }
+
+    /**
+     * Insert reference DOI on the citations and article view page.
+     *
+     * @param $hookName string Hook name
+     * @param $params array [
+     *  @option Citation
+     *  @option Smarty
+     *  @option string Rendered smarty template
+     * ]
+     */
+    public function displayReferenceDOI(string $hookName, array $params): bool
+    {
+        if (!$this->getEnabled() ||
+            !$this->hasCrossrefCredentials() ||
+            !$this->citationsEnabled()) {
+
+                return Hook::CONTINUE;
+        }
+
+        /** @var Citation $citation */
+        $citation = $params[0]['citation'];
+        /** @var \Smarty $smarty */
+        $smarty = &$params[1];
+        /** @var string $output */
+        $output = &$params[2];
+
+        if ($citation->getData($this->getCitationDoiSettingName())) {
+            $crossrefFullUrl = 'https://doi.org/' . $citation->getData($this->getCitationDoiSettingName());
+            $smarty->assign('crossrefFullUrl', $crossrefFullUrl);
+            $output .= $smarty->fetch($this->getTemplateResource('displayDOI.tpl'));
+        }
+        return Hook::CONTINUE;
+    }
+
+    /**
+     * Are Crossref username and password set in Crossref plugin
+     */
+    public function hasCrossrefCredentials(?int $contextId = null): bool
+    {
+        if (!isset($contextId)) {
+            $contextId = $this->getCurrentContextId();
+        }
+        // If crossref plugin is set i.e. the crossref credentials exist we can assume that DOI plugin is set correctly
+        $crossrefPlugin = PluginRegistry::getPlugin('generic', 'crossrefplugin');
+        return $crossrefPlugin && strlen((string) $crossrefPlugin->getSetting($contextId, 'username')) > 0 && strlen((string) $crossrefPlugin->getSetting($contextId, 'password')) > 0;
+    }
+
+    /**
+     * Are citations submission metadata enabled in this journal
+     */
+    public function citationsEnabled(?int $contextId = null): bool
+    {
+        if (!isset($contextId)) {
+            $contextId = $this->getCurrentContextId();
+        }
+        $contextDao = Application::getContextDAO();
+        $context = $contextDao->getById($contextId);
+        return !empty($context->getData('citations'));
+    }
+
+    /**
+     * Get citations diagnostic ID setting name.
+     */
+    public function getCitationsDiagnosticIdSettingName(): string
+    {
+        return 'crossref::citationsDiagnosticId';
+    }
+
+    /**
+     * Get citation crossref DOI setting name.
+     */
+    public function getCitationDoiSettingName(): string
+    {
+        return 'crossref::doi';
+    }
+
+    /**
+     * Get setting name, that defines if the scheduled task for the automatic check
+     * of the found Crossref citations DOIs should be run, if set up so in the plugin settings.
+     */
+    public function getAutoCheckSettingName(): string
+    {
+        return 'crossref::checkCitationsDOIs';
+    }
+
+    /**
+     * Retrieve all submissions that should be automatically checked for the found Crossref citations DOIs.
+     *
+     * @return Submission[]
+     */
+    public function getSubmissionsToCheck(Context $context): array
+    {
+        // Retrieve all published articles with their DOIs depositted together with the references.
+        // i.e. with the citations diagnostic ID setting
+        $submissionIds = Repo::submission()->getIdsBySetting($this->getAutoCheckSettingName(), true, $context->getId())->toArray();
+        $submissions = array_map(function ($submissionId) {
+            return Repo::submission()->get($submissionId);
+        }, $submissionIds);
+
+        return array_filter($submissions, function ($submission) {
+            return $submission->getData('status') === Submission::STATUS_PUBLISHED;
+        });
     }
 
     /**
@@ -394,84 +492,13 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
     }
 
     /**
-     * Insert reference DOI on the citations and article view page.
-     *
-     * @param $hookName string Hook name
-     * @param $params array [
-     *  @option Citation
-     *  @option Smarty
-     *  @option string Rendered smarty template
-     * ]
-     */
-    public function displayReferenceDOI(string $hookName, array $params): bool
-    {
-        /** @var Citation $citation */
-        $citation = $params[0]['citation'];
-        /** @var \Smarty $smarty */
-        $smarty = &$params[1];
-        /** @var string $output */
-        $output = &$params[2];
-
-        if ($citation->getData($this->getCitationDoiSettingName())) {
-            $crossrefFullUrl = 'https://doi.org/' . $citation->getData($this->getCitationDoiSettingName());
-            $smarty->assign('crossrefFullUrl', $crossrefFullUrl);
-            $output .= $smarty->fetch($this->getTemplateResource('displayDOI.tpl'));
-        }
-        return Hook::CONTINUE;
-    }
-
-    /**
-     * Get citations diagnostic ID setting name.
-     */
-    public function getCitationsDiagnosticIdSettingName(): string
-    {
-        return 'crossref::citationsDiagnosticId';
-    }
-
-    /**
-     * Get citation crossref DOI setting name.
-     */
-    public function getCitationDoiSettingName(): string
-    {
-        return 'crossref::doi';
-    }
-
-    /**
-     * Get setting name, that defines if the scheduled task for the automatic check
-     * of the found Crossref citations DOIs should be run, if set up so in the plugin settings.
-     */
-    public function getAutoCheckSettingName(): string
-    {
-        return 'crossref::checkCitationsDOIs';
-    }
-
-    /**
-     * Retrieve all submissions that should be automatically checked for the found Crossref citations DOIs.
-     *
-     * @return Submission[]
-     */
-    public function getSubmissionsToCheck(Context $context): array
-    {
-        // Retrieve all published articles with their DOIs depositted together with the references.
-        // i.e. with the citations diagnostic ID setting
-        $submissionIds = Repo::submission()->getIdsBySetting($this->getAutoCheckSettingName(), true, $context->getId())->toArray();
-        $submissions = array_map(function ($submissionId) {
-            return Repo::submission()->get($submissionId);
-        }, $submissionIds);
-
-        return array_filter($submissions, function ($submission) {
-            return $submission->getData('status') === Submission::STATUS_PUBLISHED;
-        });
-    }
-
-    /**
      * Use Crossref API to get the references DOIs for the the given article DOI.
      */
     protected function getResolvedRefs(string $doi, int $contextId): ?array
     {
         $matchedReferences = null;
 
-        PluginRegistry::loadCategory('generic');
+        PluginRegistry::loadCategory('generic'); // This is maybe not needed in 3.6 if we take care that generic plugins are always loaded
         $crossrefPlugin = PluginRegistry::getPlugin('generic', 'crossrefplugin');
         $username = $crossrefPlugin->getSetting($contextId, 'username');
         $password = $crossrefPlugin->getSetting($contextId, 'password');

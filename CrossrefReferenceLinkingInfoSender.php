@@ -3,8 +3,8 @@
 /**
  * @file CrossrefReferenceLinkingInfoSender.php
  *
- * Copyright (c) 2013-2023 Simon Fraser University
- * Copyright (c) 2003-2023 John Willinsky
+ * Copyright (c) 2013-2025 Simon Fraser University
+ * Copyright (c) 2003-2025 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file LICENSE.
  *
  * @class CrossrefReferenceLinkingInfoSender
@@ -71,9 +71,11 @@ class CrossrefReferenceLinkingInfoSender extends ScheduledTask
         $contextFactory = $contextDao->getAll(true); /** @var DAOResultFactory $contextFactory */
         $journals = [];
         foreach ($contextFactory->toIterator() as $journal) { /** @var Journal $journal */
-            if ($this->plugin->citationsEnabled($journal->getId()) &&
+            if ($this->plugin->getEnabled($journal->getId()) &&
+                $this->plugin->citationsEnabled($journal->getId()) &&
                 $this->plugin->hasCrossrefCredentials($journal->getId())) {
-                $journals[] = $journal;
+
+                    $journals[] = $journal;
             }
         }
         return $journals;
