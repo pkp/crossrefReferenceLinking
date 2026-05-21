@@ -240,7 +240,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
             }
             $submission = Repo::submission()->get($publications->first()->getData('submissionId'));
             $articleCitations = $submission->getCurrentPublication()->getData('citations');
-            if (!empty($articleCitations)) {
+            if ($articleCitations?->isNotEmpty()) {
                 $citationListNode = $preliminaryOutput->createElementNS($rfNamespace, 'citation_list');
                 foreach ($articleCitations as $citation) {
                     $rawCitation = $citation->getRawCitation();
