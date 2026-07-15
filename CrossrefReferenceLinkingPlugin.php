@@ -3,8 +3,8 @@
 /**
  * @file CrossrefReferenceLinkingPlugin.inc.php
  *
- * Copyright (c) 2013-2025 Simon Fraser University
- * Copyright (c) 2003-2025 John Willinsky
+ * Copyright (c) 2013-2026 Simon Fraser University
+ * Copyright (c) 2003-2026 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file LICENSE.
  *
  * @class CrossrefReferenceLinkingPlugin
@@ -20,10 +20,13 @@ use APP\notification\Notification;
 use APP\publication\Publication;
 use APP\submission\Submission;
 use DOMDocument;
+use DOMElement;
+use PKP\citation\Citation;
 use PKP\citation\CitationDAO;
 use PKP\context\Context;
 use PKP\core\JSONMessage;
 use PKP\db\DAORegistry;
+use PKP\doi\Doi;
 use PKP\linkAction\LinkAction;
 use PKP\linkAction\request\AjaxModal;
 use PKP\plugins\GenericPlugin;
@@ -148,7 +151,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
     /**
      * Add properties to the submission entity (SchemaDAO-based)
      *
-     * @param $hookName string `Schema::get::submission`
+     * @param string $hookName `Schema::get::submission`
      * @param array $args [
      *      @option stdClass $schema
      * ]
@@ -183,8 +186,8 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
     /**
      * @see AcronPlugin::_parseCrontab()
      *
-     * @param $hookName string 'AcronPlugin::parseCronTab'
-     * @param $args array [
+     * @param string $hookName 'AcronPlugin::parseCronTab'
+     * @param array $args [
      *  @option array Task files paths
      * ]
      */
@@ -205,26 +208,16 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
     /**
      * Add references data to the Crossref XML export
      *
-     * @param $hookName string 'articlecrossrefxmlfilter::execute'
-     * @param $params array [
+     * @param string $hookName 'articlecrossrefxmlfilter::execute'
+     * @param array $params [
      *  @option DOMDocument Crossref filter output
      * ]
      */
     public function addCrossrefCitationsElements(string $hookName, array $params): bool
     {
-        if (!$this->getEnabled() ||
-            !$this->hasCrossrefCredentials() ||
-            !$this->citationsEnabled()) {
-
-                return Hook::CONTINUE;
-        }
-
         /** @var DOMDocument $preliminaryOutput */
         $preliminaryOutput =& $params[0];
-        $request = Application::get()->getRequest();
-        $context = $request->getContext();
-        // Crossref export cannot be executed via CLI any more, thus there will always be a context
-        $contextId = $context->getId();
+
         $citationDao = DAORegistry::getDAO('CitationDAO'); /** @var CitationDAO $citationDao */
 
         $rfNamespace = 'http://www.crossref.org/schema/5.3.1';
@@ -235,15 +228,27 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
             $doiValue = $doiNode->nodeValue;
             // There should be only one DOI
             /** @var Doi $doi */
-            $doi = Repo::doi()->getCollector()->filterByContextIds([$contextId])->filterByIdentifier($doiValue)->getMany()->first();
+            $doi = Repo::doi()->getCollector()->filterByIdentifier($doiValue)->getMany()->first();
             if (!$doi) {
-                return false;
+                continue;
             }
             $publications = Repo::publication()->getCollector()->filterByDoiIds([$doi->getId()])->getMany();
             if ($publications->count() < 1) {
-                return false;
+                continue;
             }
             $submission = Repo::submission()->get($publications->first()->getData('submissionId'));
+            if (!$submission) {
+                continue;
+            }
+            // All journal_article nodes exported/deposited in one call belong to the same context,
+            // so if the plugin is not enabled/configured here, none of the other nodes will qualify either.
+            if (!$this->getEnabled($submission->getData('contextId')) ||
+                !$this->hasCrossrefCredentials($submission->getData('contextId')) ||
+                !$this->citationsEnabled($submission->getData('contextId'))) {
+
+                    return Hook::CONTINUE;
+            }
+
             $articleCitations = $citationDao->getByPublicationId($submission->getCurrentPublication()->getId());
             $articleCitationsArray = $articleCitations->toArray();
             if (!empty($articleCitationsArray)) {
@@ -275,36 +280,38 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
     /**
      * During the article DOI registration with Crossref, get the citations diagnostic ID from the Crossref response.
      *
-     * @param $hookName string Hook name 'crossrefexportplugin::deposited'
-     * @param array [
-     *  @option CrossrefExportPlugin
-     *  @option string XML reposonse from Crossref deposit
+     * @param string $hookName Hook name 'crossrefexportplugin::deposited'
+     * @param array $params [
+     *  @option CrossrefExportPlugin,
+     *  @option string XML response from Crossref deposit,
      *  @option Submission
      * ]
      */
     public function getCitationsDiagnosticId(string $hookName, array $params): bool
     {
-        if (!$this->getEnabled() ||
-            !$this->hasCrossrefCredentials() ||
-            !$this->citationsEnabled()) {
-
-                return Hook::CONTINUE;
-        }
-
         /** @var string $response */
         $response = & $params[1];
         /** @var Submission $submission */
         $submission = & $params[2];
+
+        if (!$submission ||
+            !$this->getEnabled($submission->getData('contextId')) ||
+            !$this->hasCrossrefCredentials($submission->getData('contextId')) ||
+            !$this->citationsEnabled($submission->getData('contextId'))) {
+
+                return Hook::CONTINUE;
+        }
+
         // Get DOMDocument from the response XML string
         $xmlDoc = new DOMDocument();
         $xmlDoc->loadXML($response);
         if ($xmlDoc->getElementsByTagName('citations_diagnostic')->length > 0) {
-            $citationsDiagnosticNode = $xmlDoc->getElementsByTagName('citations_diagnostic')->item(0); /** @var DOMNodeList $citationsDiagnosticNode */
+            $citationsDiagnosticNode = $xmlDoc->getElementsByTagName('citations_diagnostic')->item(0); /** @var DOMElement $citationsDiagnosticNode */
             $citationsDiagnosticCode = $citationsDiagnosticNode->getAttribute('deferred') ;
             //set the citations diagnostic code and the setting for the automatic check
             $submission->setData($this->getCitationsDiagnosticIdSettingName(), $citationsDiagnosticCode);
             $submission->setData($this->getAutoCheckSettingName(), true);
-            $submission = Repo::submission()->edit($submission, [], Application::get()->getRequest());
+            Repo::submission()->edit($submission, []);
         }
         return Hook::CONTINUE;
     }
@@ -313,30 +320,34 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
      * Resets the submission data related to Reference Linking Plugin.
      * Used every time the citations for a certain publication are imported.
      *
-     * @param $hookName string 'CitationDAO::afterImportCitations'
-     * @param $params array [
+     * @param string $hookName 'CitationDAO::afterImportCitations'
+     * @param array $params [
      *  @option integer The publication ID for which the citations are imported
      * ]
      */
     public function citationsChanged(string $hookName, array $params): bool
     {
-        if (!$this->getEnabled() ||
-            !$this->hasCrossrefCredentials() ||
-            !$this->citationsEnabled()) {
-
-                return Hook::CONTINUE;
-        }
-
         /** @var int $publicationId */
         $publicationId = $params[0];
 
         $publication = Repo::publication()->get($publicationId);
+        if (!$publication) {
+            return Hook::CONTINUE;
+        }
         $submission = Repo::submission()->get($publication->getData('submissionId'));
+
+        if (!$submission ||
+            !$this->getEnabled($submission->getData('contextId')) ||
+            !$this->hasCrossrefCredentials($submission->getData('contextId')) ||
+            !$this->citationsEnabled($submission->getData('contextId'))) {
+
+                return Hook::CONTINUE;
+        }
 
         if ($submission->getData($this->getCitationsDiagnosticIdSettingName())) {
             $submission->setData($this->getCitationsDiagnosticIdSettingName(), null);
             $submission->setData($this->getAutoCheckSettingName(), null);
-            $submission = Repo::submission()->edit($submission, [], Application::get()->getRequest());
+            Repo::submission()->edit($submission, []);
         }
         return Hook::CONTINUE;
     }
@@ -344,8 +355,8 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
     /**
      * Insert reference DOI on the citations and article view page.
      *
-     * @param $hookName string Hook name
-     * @param $params array [
+     * @param string $hookName Hook name 'Templates::Article::Details::Reference'
+     * @param array $params [
      *  @option Citation
      *  @option Smarty
      *  @option string Rendered smarty template
@@ -487,7 +498,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin
 
             // remove auto check setting
             $submission->setData($this->getAutoCheckSettingName(), null);
-            $submission = Repo::submission()->edit($submission, [], Application::get()->getRequest());
+            Repo::submission()->edit($submission, []);
         }
     }
 
