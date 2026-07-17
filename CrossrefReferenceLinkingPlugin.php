@@ -3,8 +3,8 @@
 /**
  * @file CrossrefReferenceLinkingPlugin.php
  *
- * Copyright (c) 2013-2025 Simon Fraser University
- * Copyright (c) 2003-2025 John Willinsky
+ * Copyright (c) 2013-2026 Simon Fraser University
+ * Copyright (c) 2003-2026 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file LICENSE.
  *
  * @class CrossrefReferenceLinkingPlugin
@@ -22,6 +22,7 @@ use APP\submission\Submission;
 use Citation;
 use Doi;
 use DOMDocument;
+use DOMElement;
 use PKP\citation\CitationDAO;
 use PKP\context\Context;
 use PKP\core\JSONMessage;
@@ -149,7 +150,7 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
     /**
      * Add properties to the submission entity (SchemaDAO-based)
      *
-     * @param $hookName string `Schema::get::submission`
+     * @param string $hookName `Schema::get::submission`
      * @param array $args [
      *      @option stdClass $schema
      * ]
@@ -201,26 +202,15 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
     /**
      * Add references data to the Crossref XML export
      *
-     * @param $hookName string 'articlecrossrefxmlfilter::execute'
-     * @param $params array [
+     * @param string $hookName 'articlecrossrefxmlfilter::execute'
+     * @param array $params [
      *  @option DOMDocument Crossref filter output
      * ]
      */
     public function addCrossrefCitationsElements(string $hookName, array $params): bool
     {
-        if (!$this->getEnabled() ||
-            !$this->hasCrossrefCredentials() ||
-            !$this->citationsEnabled()) {
-
-                return Hook::CONTINUE;
-        }
-
         /** @var DOMDocument $preliminaryOutput */
         $preliminaryOutput =& $params[0];
-        $request = Application::get()->getRequest();
-        $context = $request->getContext();
-        // Crossref export cannot be executed via CLI any more, thus there will always be a context
-        $contextId = $context->getId();
 
         $rfNamespace = 'http://www.crossref.org/schema/5.4.0';
         $articleNodes = $preliminaryOutput->getElementsByTagName('journal_article');
@@ -230,15 +220,27 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
             $doiValue = $doiNode->nodeValue;
             // There should be only one DOI
             /** @var Doi $doi */
-            $doi = Repo::doi()->getCollector()->filterByContextIds([$contextId])->filterByIdentifier($doiValue)->getMany()->first();
+            $doi = Repo::doi()->getCollector()->filterByIdentifier($doiValue)->getMany()->first();
             if (!$doi) {
-                return false;
+                continue;
             }
             $publications = Repo::publication()->getCollector()->filterByDoiIds([$doi->getId()])->getMany();
             if ($publications->count() < 1) {
-                return false;
+                continue;
             }
             $submission = Repo::submission()->get($publications->first()->getData('submissionId'));
+            if (!$submission) {
+                continue;
+            }
+            // All journal_article nodes exported/deposited in one call belong to the same context,
+            // so if the plugin is not enabled/configured here, none of the other nodes will qualify either.
+            if (!$this->getEnabled($submission->getData('contextId')) ||
+                !$this->hasCrossrefCredentials($submission->getData('contextId')) ||
+                !$this->citationsEnabled($submission->getData('contextId'))) {
+
+                    return Hook::CONTINUE;
+            }
+
             $articleCitations = $submission->getCurrentPublication()->getData('citations');
             if ($articleCitations?->isNotEmpty()) {
                 $citationListNode = $preliminaryOutput->createElementNS($rfNamespace, 'citation_list');
@@ -269,8 +271,8 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
     /**
      * During the article DOI registration with Crossref, get the citations diagnostic ID from the Crossref response.
      *
-     * @param $hookName string Hook name 'crossrefexportplugin::deposited'
-     * @param $params array [
+     * @param string $hookName Hook name 'crossrefexportplugin::deposited'
+     * @param array $params [
      *  @option CrossrefExportPlugin
      *  @option string XML response from Crossref deposit
      *  @option Submission
@@ -278,22 +280,24 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
      */
     public function getCitationsDiagnosticId(string $hookName, array $params): bool
     {
-        if (!$this->getEnabled() ||
-            !$this->hasCrossrefCredentials() ||
-            !$this->citationsEnabled()) {
-
-                return Hook::CONTINUE;
-        }
-
         /** @var string $response */
         $response = & $params[1];
         /** @var Submission $submission */
         $submission = & $params[2];
+
+        if (!$submission ||
+            !$this->getEnabled($submission->getData('contextId')) ||
+            !$this->hasCrossrefCredentials($submission->getData('contextId')) ||
+            !$this->citationsEnabled($submission->getData('contextId'))) {
+
+                return Hook::CONTINUE;
+        }
+
         // Get DOMDocument from the response XML string
         $xmlDoc = new DOMDocument();
         $xmlDoc->loadXML($response);
         if ($xmlDoc->getElementsByTagName('citations_diagnostic')->length > 0) {
-            $citationsDiagnosticNode = $xmlDoc->getElementsByTagName('citations_diagnostic')->item(0); /** @var DOMNodeList $citationsDiagnosticNode */
+            $citationsDiagnosticNode = $xmlDoc->getElementsByTagName('citations_diagnostic')->item(0); /** @var DOMElement $citationsDiagnosticNode */
             $citationsDiagnosticCode = $citationsDiagnosticNode->getAttribute('deferred') ;
             //set the citations diagnostic code and the setting for the automatic check
             $submission->setData($this->getCitationsDiagnosticIdSettingName(), $citationsDiagnosticCode);
@@ -308,19 +312,23 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
      * Resets the submission data related to Reference Linking Plugin.
      * Used every time the citations for a certain publication are imported.
      *
-     * @param $hookName string 'Citation::importCitations::after'
+     * @param string $hookName 'Citation::importCitations::after'
      */
     public function citationsChanged(string $hookName, int $publicationId, array $existingCitations, array $importedCitations): bool
     {
-        if (!$this->getEnabled() ||
-            !$this->hasCrossrefCredentials() ||
-            !$this->citationsEnabled()) {
+        $publication = Repo::publication()->get($publicationId);
+        if (!$publication) {
+            return Hook::CONTINUE;
+        }
+        $submission = Repo::submission()->get($publication->getData('submissionId'));
+
+        if (!$submission ||
+            !$this->getEnabled($submission->getData('contextId')) ||
+            !$this->hasCrossrefCredentials($submission->getData('contextId')) ||
+            !$this->citationsEnabled($submission->getData('contextId'))) {
 
                 return Hook::CONTINUE;
         }
-
-        $publication = Repo::publication()->get($publicationId);
-        $submission = Repo::submission()->get($publication->getData('submissionId'));
 
         if ($submission->getData($this->getCitationsDiagnosticIdSettingName())) {
             $submission->setData($this->getCitationsDiagnosticIdSettingName(), null);
@@ -333,8 +341,8 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
     /**
      * Insert reference DOI on the citations and article view page.
      *
-     * @param $hookName string Hook name
-     * @param $params array [
+     * @param string $hookName Hook name
+     * @param array $params [
      *  @option Citation
      *  @option Smarty
      *  @option string Rendered smarty template
