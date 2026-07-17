@@ -13,8 +13,8 @@
 <version>
 	<application>crossrefReferenceLinking</application>
 	<type>plugins.generic</type>
-	<release>2.0.0.1</release>
-	<date>2025-12-09</date>
+	<release>2.0.0.2</release>
+	<date>2026-07-17</date>
 	<lazy-load>1</lazy-load>
 	<sitewide>1</sitewide>
 	<class>CrossrefReferenceLinkingPlugin</class>
