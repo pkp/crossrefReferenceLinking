@@ -187,11 +187,9 @@ class CrossrefReferenceLinkingPlugin extends GenericPlugin implements HasTaskSch
      */
     public function registerSchedules(PKPScheduler $scheduler): void
     {
-        if (!$this->getEnabled() ||
-            !$this->hasCrossrefCredentials() ||
-            !$this->citationsEnabled()) {
-                return;
-        }
+        // No context is available when the scheduler registers the plugin schedules,
+        // so the plugin configuration cannot be consulted here. The task itself filters
+        // the journals it has to process, in CrossrefReferenceLinkingInfoSender::getJournals().
         $scheduler
             ->addSchedule(new CrossrefReferenceLinkingInfoSender([]))
             ->hourly()
